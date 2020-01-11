@@ -98,7 +98,15 @@ declare module 'LayoutTypes' {
     (node: css_node_t, maxWidth: number, maxHeight: number, parentDirection: css_direction_t): any
   }
 
-  export interface compareNumber {
-    (a: number | undefined, b: number | undefined): boolean,
+  export interface eq<T> {
+    (a: T | undefined, b: T | undefined): boolean,
+  }
+
+  export interface nodeResolver<T> {
+    (node: css_node_t, a: any): T,
+  }
+
+  export interface styleGetter<T> {
+    (node: css_node_t): T,
   }
 }
