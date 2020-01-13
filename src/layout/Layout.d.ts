@@ -99,14 +99,22 @@ declare module 'LayoutTypes' {
   }
 
   export interface eq<T> {
-    (a: T | undefined, b: T | undefined): boolean,
+    (a: T | undefined, b?: T | undefined): boolean,
   }
 
-  export interface nodeResolver<T> {
-    (node: css_node_t, a: any): T,
+  export interface boundAxis {
+    (node: css_node_t, axis: css_flex_direction_t, value: number): number,
   }
 
   export interface styleGetter<T> {
     (node: css_node_t): T,
+  }
+
+  export interface layoutResolver<T> {
+    (layout: T, a: any): T,
+  }
+
+  export interface compare<T> {
+    (a: T, b: T): T,
   }
 }
