@@ -102,19 +102,27 @@ declare module 'LayoutTypes' {
     (a: T | undefined, b?: T | undefined): boolean,
   }
 
-  export interface boundAxis {
-    (node: css_node_t, axis: css_flex_direction_t, value: number): number,
+  export interface compare<T> {
+    (a: T, b: T): T,
+  }
+
+  export interface isDefined<T> {
+    (node: css_node_t, a: T): boolean,
   }
 
   export interface styleGetter<T> {
-    (node: css_node_t): T,
+    (node: css_node_t, a?: any): T,
   }
 
   export interface layoutResolver<T> {
     (layout: T, a: any): T,
   }
 
-  export interface compare<T> {
-    (a: T, b: T): T,
+  export interface boundAxis {
+    (node: css_node_t, axis: css_flex_direction_t, value: number): number,
+  }
+
+  export interface layoutSetterOnAxis {
+    (node: css_node_t, axis: css_flex_direction_t): void,
   }
 }

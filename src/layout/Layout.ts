@@ -2,6 +2,43 @@
 
 import * as LayoutTypes from 'LayoutTypes';
 
+const dim: LayoutTypes.css_dimension_t[] = [
+  1, // CSS_FLEX_DIRECTION_COLUMN => HEIGHT
+  1, // CSS_FLEX_DIRECTION_COLUMN_REVERSE => HEIGHT
+  0, // CSS_FLEX_DIRECTION_ROW => WIDTH
+  0, // CSS_FLEX_DIRECTION_ROW_REVERSE => WIDTH
+];
+
+const trailing: LayoutTypes.css_position_t[] = [
+  2, // CSS_FLEX_DIRECTION_COLUMN => BOTTOM
+  0, // CSS_FLEX_DIRECTION_COLUMN_REVERSE => TOP
+  1, // CSS_FLEX_DIRECTION_ROW => RIGHT
+  3, // CSS_FLEX_DIRECTION_ROW_REVERSE => LEFT
+];
+
+const leading: LayoutTypes.css_position_t[] = [
+  0, // CSS_FLEX_DIRECTION_COLUMN => TOP
+  2, // CSS_FLEX_DIRECTION_COLUMN_REVERSE => BOTTOM
+  3, // CSS_FLEX_DIRECTION_ROW => LEFT
+  1, // CSS_FLEX_DIRECTION_ROW_REVERSE => RIGHT
+];
+
+const isLayoutDimDefined: LayoutTypes.isDefined<LayoutTypes.css_flex_direction_t> = function (
+  node: LayoutTypes.css_node_t,
+  axis: LayoutTypes.css_flex_direction_t,
+) {
+  const value = node.layout.dimensions[dim[axis]];
+  return !!value && value >= 0.0;
+};
+
+const isStyleDimDefined: LayoutTypes.isDefined<LayoutTypes.css_flex_direction_t> = function (
+  node: LayoutTypes.css_node_t,
+  axis: LayoutTypes.css_flex_direction_t,
+) {
+  const value = node.style.dimensions[dim[axis]];
+  return !!value && value >= 0.0;
+};
+
 const eq: LayoutTypes.eq<number> = function (
   a: number | undefined,
   b: number | undefined,
@@ -22,6 +59,81 @@ const fmaxf: LayoutTypes.compare<number> = function (
   b: number,
 ) {
   return (a > b) ? a : b;
+};
+
+const getLeadingMargin: LayoutTypes.styleGetter<number> = function (
+  node: LayoutTypes.css_node_t,
+  axis: LayoutTypes.css_flex_direction_t,
+) {
+  return node.style.margin[leading[axis]];
+};
+
+const getTrailingMargin: LayoutTypes.styleGetter<number> = function (
+  node: LayoutTypes.css_node_t,
+  axis: LayoutTypes.css_flex_direction_t,
+) {
+  return node.style.margin[trailing[axis]];
+};
+
+const getLeadingBorder: LayoutTypes.styleGetter<number> = function (
+  node: LayoutTypes.css_node_t,
+  axis: LayoutTypes.css_flex_direction_t,
+) {
+  if (node.style.border[leading[axis]] >= 0) {
+    return node.style.padding[leading[axis]];
+  }
+  return 0;
+};
+
+const getTrailingBorder: LayoutTypes.styleGetter<number> = function (
+  node: LayoutTypes.css_node_t,
+  axis: LayoutTypes.css_flex_direction_t,
+) {
+  if (node.style.border[trailing[axis]] >= 0) {
+    return node.style.padding[leading[axis]];
+  }
+  return 0;
+};
+
+const getLeadingPadding: LayoutTypes.styleGetter<number> = function (
+  node: LayoutTypes.css_node_t,
+  axis: LayoutTypes.css_flex_direction_t,
+) {
+  if (node.style.padding[leading[axis]] >= 0) {
+    return node.style.padding[leading[axis]];
+  }
+  return 0;
+};
+
+const getTrailingPadding: LayoutTypes.styleGetter<number> = function (
+  node: LayoutTypes.css_node_t,
+  axis: LayoutTypes.css_flex_direction_t,
+) {
+  if (node.style.padding[trailing[axis]] >= 0) {
+    return node.style.padding[leading[axis]];
+  }
+  return 0;
+};
+
+const getLeadingPaddingAndBorder: LayoutTypes.styleGetter<number> = function (
+  node: LayoutTypes.css_node_t,
+  axis: LayoutTypes.css_flex_direction_t,
+) {
+  return getLeadingPadding(node, axis) + getLeadingBorder(node, axis);
+};
+
+const getTrailingPaddingAndBorder: LayoutTypes.styleGetter<number> = function (
+  node: LayoutTypes.css_node_t,
+  axis: LayoutTypes.css_flex_direction_t,
+) {
+  return getTrailingPadding(node, axis) + getTrailingBorder(node, axis);
+};
+
+const getPaddingAndBorderAxis: LayoutTypes.styleGetter<number> = function (
+  node: LayoutTypes.css_node_t,
+  axis: LayoutTypes.css_flex_direction_t,
+) {
+  return getLeadingPaddingAndBorder(node, axis) + getTrailingPaddingAndBorder(node, axis);
 };
 
 const boundAxis: LayoutTypes.boundAxis = function (
@@ -49,6 +161,19 @@ const boundAxis: LayoutTypes.boundAxis = function (
   }
 
   return boundValue;
+};
+
+const setDimensionFromStyle: LayoutTypes.layoutSetterOnAxis = function (
+  node: LayoutTypes.css_node_t,
+  axis: LayoutTypes.css_flex_direction_t,
+) {
+  if (isLayoutDimDefined(node, axis) || !isStyleDimDefined(node, axis)) {
+    return;
+  }
+  node.layout.dimensions[dim[axis]] = fmaxf(
+    boundAxis(node, axis, node.style.dimensions[dim[axis]]),
+    getPaddingAndBorderAxis(node, axis),
+  );
 };
 
 const isColumnDirection: LayoutTypes.eq<LayoutTypes.css_flex_direction_t> = function (
@@ -117,6 +242,11 @@ const layoutNodeImpl:LayoutTypes.layout = function (
     resolveDirection(getDirection(node), parentDirection);
   const mainAxis: LayoutTypes.css_flex_direction_t = resolveAxis(getFlexDirection(node), direction);
   const crossAxis: LayoutTypes.css_flex_direction_t = getCrossFlexDirection(mainAxis, direction);
+
+  setDimensionFromStyle(node, mainAxis);
+  setDimensionFromStyle(node, crossAxis);
+
+  node.layout.direction = direction;
 };
 
 const layoutNode: LayoutTypes.layout = function (
