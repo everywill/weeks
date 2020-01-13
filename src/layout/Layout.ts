@@ -3,24 +3,24 @@
 import * as LayoutTypes from 'LayoutTypes';
 
 const dim: LayoutTypes.css_dimension_t[] = [
-  1, // CSS_FLEX_DIRECTION_COLUMN => HEIGHT
-  1, // CSS_FLEX_DIRECTION_COLUMN_REVERSE => HEIGHT
-  0, // CSS_FLEX_DIRECTION_ROW => WIDTH
-  0, // CSS_FLEX_DIRECTION_ROW_REVERSE => WIDTH
+  LayoutTypes.css_dimension_t.CSS_HEIGHT, // CSS_FLEX_DIRECTION_COLUMN => HEIGHT
+  LayoutTypes.css_dimension_t.CSS_HEIGHT, // CSS_FLEX_DIRECTION_COLUMN_REVERSE => HEIGHT
+  LayoutTypes.css_dimension_t.CSS_WIDTH, // CSS_FLEX_DIRECTION_ROW => WIDTH
+  LayoutTypes.css_dimension_t.CSS_WIDTH, // CSS_FLEX_DIRECTION_ROW_REVERSE => WIDTH
 ];
 
 const trailing: LayoutTypes.css_position_t[] = [
-  2, // CSS_FLEX_DIRECTION_COLUMN => BOTTOM
-  0, // CSS_FLEX_DIRECTION_COLUMN_REVERSE => TOP
-  1, // CSS_FLEX_DIRECTION_ROW => RIGHT
-  3, // CSS_FLEX_DIRECTION_ROW_REVERSE => LEFT
+  LayoutTypes.css_position_t.CSS_BOTTOM, // CSS_FLEX_DIRECTION_COLUMN => BOTTOM
+  LayoutTypes.css_position_t.CSS_TOP, // CSS_FLEX_DIRECTION_COLUMN_REVERSE => TOP
+  LayoutTypes.css_position_t.CSS_RIGHT, // CSS_FLEX_DIRECTION_ROW => RIGHT
+  LayoutTypes.css_position_t.CSS_LEFT, // CSS_FLEX_DIRECTION_ROW_REVERSE => LEFT
 ];
 
 const leading: LayoutTypes.css_position_t[] = [
-  0, // CSS_FLEX_DIRECTION_COLUMN => TOP
-  2, // CSS_FLEX_DIRECTION_COLUMN_REVERSE => BOTTOM
-  3, // CSS_FLEX_DIRECTION_ROW => LEFT
-  1, // CSS_FLEX_DIRECTION_ROW_REVERSE => RIGHT
+  LayoutTypes.css_position_t.CSS_TOP, // CSS_FLEX_DIRECTION_COLUMN => TOP
+  LayoutTypes.css_position_t.CSS_BOTTOM, // CSS_FLEX_DIRECTION_COLUMN_REVERSE => BOTTOM
+  LayoutTypes.css_position_t.CSS_LEFT, // CSS_FLEX_DIRECTION_ROW => LEFT
+  LayoutTypes.css_position_t.CSS_RIGHT, // CSS_FLEX_DIRECTION_ROW_REVERSE => RIGHT
 ];
 
 const isLayoutDimDefined: LayoutTypes.isDefined<LayoutTypes.css_flex_direction_t> = function (
@@ -37,6 +37,20 @@ const isStyleDimDefined: LayoutTypes.isDefined<LayoutTypes.css_flex_direction_t>
 ) {
   const value = node.style.dimensions[dim[axis]];
   return !!value && value >= 0.0;
+};
+
+const isPosDefined: LayoutTypes.isDefined<LayoutTypes.css_position_t> = function (
+  node: LayoutTypes.css_node_t,
+  position: LayoutTypes.css_position_t,
+) {
+  return !isNaN(node.style.position[position]);
+};
+
+const isFlex: LayoutTypes.judge = function (
+  node: LayoutTypes.css_node_t,
+) {
+  return node.style.position_type === LayoutTypes.css_position_type_t.CSS_POSITION_RELATIVE &&
+    getFlex(node) > 0;
 };
 
 const eq: LayoutTypes.eq<number> = function (
@@ -61,6 +75,40 @@ const fmaxf: LayoutTypes.compare<number> = function (
   return (a > b) ? a : b;
 };
 
+const getPosition: LayoutTypes.styleGetter<number> = function (
+  node: LayoutTypes.css_node_t,
+  position: LayoutTypes.css_position_t,
+) {
+  const result = node.style.position[position];
+  if (!!result) {
+    return result;
+  }
+  return 0;
+};
+
+const getFlex: LayoutTypes.styleGetter<number> = function (
+  node: LayoutTypes.css_node_t,
+) {
+  return node.style.flex;
+};
+
+const getFlexWrap: LayoutTypes.styleGetter<number> = function (
+  node: LayoutTypes.css_node_t,
+) {
+  return node.style.flex_wrap === LayoutTypes.css_wrap_type_t.CSS_WRAP;
+};
+
+const getRelativePosition: LayoutTypes.styleGetter<number> = function (
+  node: LayoutTypes.css_node_t,
+  axis: LayoutTypes.css_flex_direction_t,
+) {
+  const lead = getPosition(node, leading[axis]);
+  if (!!lead) {
+    return lead;
+  }
+  return - getPosition(node, trailing[axis]);
+};
+
 const getLeadingMargin: LayoutTypes.styleGetter<number> = function (
   node: LayoutTypes.css_node_t,
   axis: LayoutTypes.css_flex_direction_t,
@@ -79,8 +127,9 @@ const getLeadingBorder: LayoutTypes.styleGetter<number> = function (
   node: LayoutTypes.css_node_t,
   axis: LayoutTypes.css_flex_direction_t,
 ) {
-  if (node.style.border[leading[axis]] >= 0) {
-    return node.style.padding[leading[axis]];
+  const result = node.style.border[leading[axis]];
+  if (result >= 0) {
+    return result;
   }
   return 0;
 };
@@ -89,8 +138,9 @@ const getTrailingBorder: LayoutTypes.styleGetter<number> = function (
   node: LayoutTypes.css_node_t,
   axis: LayoutTypes.css_flex_direction_t,
 ) {
-  if (node.style.border[trailing[axis]] >= 0) {
-    return node.style.padding[leading[axis]];
+  const result = node.style.border[trailing[axis]];
+  if (result >= 0) {
+    return result;
   }
   return 0;
 };
@@ -99,8 +149,9 @@ const getLeadingPadding: LayoutTypes.styleGetter<number> = function (
   node: LayoutTypes.css_node_t,
   axis: LayoutTypes.css_flex_direction_t,
 ) {
-  if (node.style.padding[leading[axis]] >= 0) {
-    return node.style.padding[leading[axis]];
+  const result = node.style.padding[leading[axis]];
+  if (result >= 0) {
+    return result;
   }
   return 0;
 };
@@ -109,8 +160,9 @@ const getTrailingPadding: LayoutTypes.styleGetter<number> = function (
   node: LayoutTypes.css_node_t,
   axis: LayoutTypes.css_flex_direction_t,
 ) {
-  if (node.style.padding[trailing[axis]] >= 0) {
-    return node.style.padding[leading[axis]];
+  const result = node.style.padding[trailing[axis]];
+  if (result >= 0) {
+    return result;
   }
   return 0;
 };
@@ -127,6 +179,13 @@ const getTrailingPaddingAndBorder: LayoutTypes.styleGetter<number> = function (
   axis: LayoutTypes.css_flex_direction_t,
 ) {
   return getTrailingPadding(node, axis) + getTrailingBorder(node, axis);
+};
+
+const getMaginAxis: LayoutTypes.styleGetter<number> = function (
+  node: LayoutTypes.css_node_t,
+  axis: LayoutTypes.css_flex_direction_t,
+) {
+  return getLeadingMargin(node, axis) + getTrailingMargin(node, axis);
 };
 
 const getPaddingAndBorderAxis: LayoutTypes.styleGetter<number> = function (
@@ -206,6 +265,16 @@ const resolveDirection: LayoutTypes.layoutResolver<LayoutTypes.css_direction_t> 
   return direction;
 };
 
+const resolveAlignItem: LayoutTypes.layoutResolver<LayoutTypes.css_align_t> = function(
+  nodeAlignItems: LayoutTypes.css_align_t,
+  childAlignSelf: LayoutTypes.css_align_t,
+) {
+  if (childAlignSelf !== LayoutTypes.css_align_t.CSS_ALIGN_AUTO) {
+    return childAlignSelf;
+  }
+  return nodeAlignItems;
+};
+
 const resolveAxis: LayoutTypes.layoutResolver<LayoutTypes.css_flex_direction_t> = function (
   flexDirection: LayoutTypes.css_flex_direction_t,
   direction: LayoutTypes.css_direction_t,
@@ -221,16 +290,17 @@ const resolveAxis: LayoutTypes.layoutResolver<LayoutTypes.css_flex_direction_t> 
   return flexDirection;
 };
 
-const getCrossFlexDirection: LayoutTypes.layoutResolver<LayoutTypes.css_flex_direction_t> = function (
-  mainAxis: LayoutTypes.css_flex_direction_t,
-  direction: LayoutTypes.css_direction_t,
-) {
-  if (isColumnDirection(mainAxis)) {
-    return resolveAxis(LayoutTypes.css_flex_direction_t.CSS_FLEX_DIRECTION_ROW, direction);
-  }
-  return LayoutTypes.css_flex_direction_t.CSS_FLEX_DIRECTION_COLUMN;
+const getCrossFlexDirection: LayoutTypes.layoutResolver<LayoutTypes.css_flex_direction_t> = 
+  function (
+    mainAxis: LayoutTypes.css_flex_direction_t,
+    direction: LayoutTypes.css_direction_t,
+  ) {
+    if (isColumnDirection(mainAxis)) {
+      return resolveAxis(LayoutTypes.css_flex_direction_t.CSS_FLEX_DIRECTION_ROW, direction);
+    }
+    return LayoutTypes.css_flex_direction_t.CSS_FLEX_DIRECTION_COLUMN;
 
-};
+  };
 
 const layoutNodeImpl:LayoutTypes.layout = function (
   node: LayoutTypes.css_node_t,
@@ -247,6 +317,110 @@ const layoutNodeImpl:LayoutTypes.layout = function (
   setDimensionFromStyle(node, crossAxis);
 
   node.layout.direction = direction;
+
+  // node.layout.position[leading[mainAxis]] +=
+  //   getLeadingMargin(node, mainAxis) + getRelativePosition(node, mainAxis);
+  // node.layout.position[trailing[mainAxis]] +=
+  //   getTrailingMargin(node, mainAxis) + getRelativePosition(node, mainAxis);
+
+  const childCount: number = node.children_count;
+
+  const paddingAndBorderOnAxisCross = getPaddingAndBorderAxis(node, crossAxis);
+  const isMainDimDefined = isLayoutDimDefined(node, mainAxis);
+  const isCrossDimDefined = isLayoutDimDefined(node, crossAxis);
+
+  let firstAbsoluteChild: LayoutTypes.css_node_t | null = null;
+  let currentAbsoluteChild: LayoutTypes.css_node_t | null = null;
+
+  let startLine: number = 0;
+  let endLine: number = 0;
+
+  while (endLine < childCount) {
+    let mainContentDim: number = 0;
+    let flexibleChildrenCount: number = 0;
+    let totalFlexible: number = 0;
+    let nonFlexibleChildrenCount: number = 0;
+
+    let firstFlexChild: LayoutTypes.css_node_t | null = null;
+    let currentFlexChild: LayoutTypes.css_node_t | null = null;
+
+    // tslint:disable-next-line: no-increment-decrement
+    for (let i: number = startLine; i < childCount; i ++) {
+      const child: LayoutTypes.css_node_t = node.get_child(node.context, i);
+
+      child.next_absolute_child = null;
+      child.next_flex_child = null;
+
+      const alignItem: LayoutTypes.css_align_t =
+        resolveAlignItem(node.style.align_items, child.style.align_self);
+      // prefill children's layout dimension as early as possible
+      if (alignItem === LayoutTypes.css_align_t.CSS_ALIGN_STRETCH &&
+          child.style.position_type === LayoutTypes.css_position_type_t.CSS_POSITION_RELATIVE &&
+          isCrossDimDefined &&
+          !isStyleDimDefined(child, crossAxis)) {
+        child.layout.dimensions[dim[crossAxis]] = fmaxf(
+          boundAxis(child, crossAxis, node.layout.dimensions[dim[crossAxis]] -
+            paddingAndBorderOnAxisCross - getMaginAxis(child, crossAxis)),
+          getPaddingAndBorderAxis(child, crossAxis),
+        );
+      // tslint:disable-next-line: max-line-length
+      } else if (child.style.position_type === LayoutTypes.css_position_type_t.CSS_POSITION_ABSOLUTE) {
+        if (firstAbsoluteChild === null) {
+          firstAbsoluteChild = child;
+        }
+        if (currentAbsoluteChild !== null) {
+          (currentAbsoluteChild as LayoutTypes.css_node_t).next_absolute_child = child;
+        }
+        currentAbsoluteChild = child;
+
+        // tslint:disable-next-line: no-increment-decrement
+        for (let ii = 0; ii < 2; ii++) {
+          const axis: LayoutTypes.css_flex_direction_t = (ii !== 0) ?
+            LayoutTypes.css_flex_direction_t.CSS_FLEX_DIRECTION_ROW :
+            LayoutTypes.css_flex_direction_t.CSS_FLEX_DIRECTION_COLUMN;
+          if (isLayoutDimDefined(node, axis) &&
+              !isStyleDimDefined(child, axis) &&
+              isPosDefined(child, leading[axis]) &&
+              isPosDefined(child, trailing[axis])
+              ) {
+            child.layout.dimensions[dim[axis]] = fmaxf(
+              boundAxis(child, axis, node.layout.dimensions[dim[axis]] -
+                getPaddingAndBorderAxis(node, axis) -
+                getMaginAxis(child, axis) -
+                getPosition(child, leading[axis]) -
+                getPosition(child, trailing[axis]),
+                ),
+              getPaddingAndBorderAxis(child, axis),
+            );
+          }
+        }
+      }
+
+      let nextContentDim: number = 0;
+
+      if (isMainDimDefined && isFlex(child)) {
+        flexibleChildrenCount += 1;
+        totalFlexible += child.style.flex;
+
+        if (firstFlexChild === null) {
+          firstFlexChild = child;
+        }
+
+        if (currentFlexChild !== null) {
+          (currentFlexChild as LayoutTypes.css_node_t).next_flex_child = child;
+        }
+        currentFlexChild = child;
+
+        // smallest possible size of the child for computing remaining available space
+        nextContentDim = getPaddingAndBorderAxis(child, mainAxis) +
+          getMaginAxis(child, mainAxis);
+      } else {
+        if (child.style.position_type === LayoutTypes.css_position_type_t.CSS_POSITION_RELATIVE) {
+          nonFlexibleChildrenCount += 1;
+        }
+      }
+    }
+  }
 };
 
 const layoutNode: LayoutTypes.layout = function (

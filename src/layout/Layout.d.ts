@@ -90,8 +90,11 @@ declare module 'LayoutTypes' {
     children_count: number,
     line_count: number,
 
-    next_absolute_child: css_node_t,
-    next_flex_child: css_node_t,
+    next_absolute_child: css_node_t | null,
+    next_flex_child: css_node_t | null,
+
+    context: any,
+    get_child: (context: any, i: number) => css_node_t,
   }
 
   export interface layout {
@@ -104,6 +107,10 @@ declare module 'LayoutTypes' {
 
   export interface compare<T> {
     (a: T, b: T): T,
+  }
+
+  export interface judge {
+    (node: css_node_t): boolean,
   }
 
   export interface isDefined<T> {
