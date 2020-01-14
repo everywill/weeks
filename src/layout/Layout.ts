@@ -9,6 +9,13 @@ const dim: LayoutTypes.css_dimension_t[] = [
   LayoutTypes.css_dimension_t.CSS_WIDTH, // CSS_FLEX_DIRECTION_ROW_REVERSE => WIDTH
 ];
 
+const leading: LayoutTypes.css_position_t[] = [
+  LayoutTypes.css_position_t.CSS_TOP, // CSS_FLEX_DIRECTION_COLUMN => TOP
+  LayoutTypes.css_position_t.CSS_BOTTOM, // CSS_FLEX_DIRECTION_COLUMN_REVERSE => BOTTOM
+  LayoutTypes.css_position_t.CSS_LEFT, // CSS_FLEX_DIRECTION_ROW => LEFT
+  LayoutTypes.css_position_t.CSS_RIGHT, // CSS_FLEX_DIRECTION_ROW_REVERSE => RIGHT
+];
+
 const trailing: LayoutTypes.css_position_t[] = [
   LayoutTypes.css_position_t.CSS_BOTTOM, // CSS_FLEX_DIRECTION_COLUMN => BOTTOM
   LayoutTypes.css_position_t.CSS_TOP, // CSS_FLEX_DIRECTION_COLUMN_REVERSE => TOP
@@ -16,7 +23,7 @@ const trailing: LayoutTypes.css_position_t[] = [
   LayoutTypes.css_position_t.CSS_LEFT, // CSS_FLEX_DIRECTION_ROW_REVERSE => LEFT
 ];
 
-const leading: LayoutTypes.css_position_t[] = [
+const pos: LayoutTypes.css_position_t[] = [
   LayoutTypes.css_position_t.CSS_TOP, // CSS_FLEX_DIRECTION_COLUMN => TOP
   LayoutTypes.css_position_t.CSS_BOTTOM, // CSS_FLEX_DIRECTION_COLUMN_REVERSE => BOTTOM
   LayoutTypes.css_position_t.CSS_LEFT, // CSS_FLEX_DIRECTION_ROW => LEFT
@@ -51,6 +58,12 @@ const isFlex: LayoutTypes.judge = function (
 ) {
   return node.style.position_type === LayoutTypes.css_position_type_t.CSS_POSITION_RELATIVE &&
     getFlex(node) > 0;
+};
+
+const isFlexWrap: LayoutTypes.judge = function (
+  node: LayoutTypes.css_node_t,
+) {
+  return node.style.flex_wrap === LayoutTypes.css_wrap_type_t.CSS_WRAP;
 };
 
 const eq: LayoutTypes.eq<number> = function (
@@ -302,6 +315,14 @@ const getCrossFlexDirection: LayoutTypes.layoutResolver<LayoutTypes.css_flex_dir
 
   };
 
+const getDimWithMargin: LayoutTypes.nodeResolver<number> = function (
+  node: LayoutTypes.css_node_t,
+  axis: LayoutTypes.css_flex_direction_t,
+) {
+  return node.layout.dimensions[dim[axis]] +
+    getLeadingMargin(node, axis) + getTrailingMargin(node, axis);
+};
+
 const layoutNodeImpl:LayoutTypes.layout = function (
   node: LayoutTypes.css_node_t,
   parentMaxWidth: number,
@@ -325,15 +346,27 @@ const layoutNodeImpl:LayoutTypes.layout = function (
 
   const childCount: number = node.children_count;
 
-  const paddingAndBorderOnAxisCross = getPaddingAndBorderAxis(node, crossAxis);
-  const isMainDimDefined = isLayoutDimDefined(node, mainAxis);
-  const isCrossDimDefined = isLayoutDimDefined(node, crossAxis);
+  const leadingPaddingAndBorderMain: number = getLeadingPaddingAndBorder(node, mainAxis);
+  const leadingPaddingAndBorderCross: number = getLeadingPaddingAndBorder(node, crossAxis);
+  const paddingAndBorderOnAxisMain: number = getPaddingAndBorderAxis(node, mainAxis);
+  const paddingAndBorderOnAxisCross: number = getPaddingAndBorderAxis(node, crossAxis);
+  const isMainDimDefined: boolean = isLayoutDimDefined(node, mainAxis);
+  const isCrossDimDefined: boolean = isLayoutDimDefined(node, crossAxis);
+  const isNodeFlexWrap: boolean = isFlexWrap(node);
+  const justifyContent: LayoutTypes.css_justify_t = node.style.justify_content;
 
   let firstAbsoluteChild: LayoutTypes.css_node_t | null = null;
   let currentAbsoluteChild: LayoutTypes.css_node_t | null = null;
 
+  let definedMainDim: number | undefined = undefined;
+  if (isMainDimDefined) {
+    definedMainDim = node.layout.dimensions[dim[mainAxis]] - paddingAndBorderOnAxisMain;
+  }
+
   let startLine: number = 0;
   let endLine: number = 0;
+
+  let linesCrossDim: number = 0;
 
   while (endLine < childCount) {
     let mainContentDim: number = 0;
@@ -341,8 +374,19 @@ const layoutNodeImpl:LayoutTypes.layout = function (
     let totalFlexible: number = 0;
     let nonFlexibleChildrenCount: number = 0;
 
+    let isSimpleStackMain: boolean =
+      (isMainDimDefined && justifyContent === LayoutTypes.css_justify_t.CSS_JUSTIFY_FLEX_START) ||
+      (!isMainDimDefined && justifyContent !== LayoutTypes.css_justify_t.CSS_JUSTIFY_CENTER);
+    let firstComplexMain: number = isSimpleStackMain ? childCount : startLine;
+
+    let isSimpleStackCross = true;
+    let firstComplexCross = childCount;
+
     let firstFlexChild: LayoutTypes.css_node_t | null = null;
     let currentFlexChild: LayoutTypes.css_node_t | null = null;
+
+    let mainDim: number = leadingPaddingAndBorderMain;
+    let crossDim: number = 0;
 
     // tslint:disable-next-line: no-increment-decrement
     for (let i: number = startLine; i < childCount; i ++) {
@@ -417,8 +461,45 @@ const layoutNodeImpl:LayoutTypes.layout = function (
       } else {
         if (child.style.position_type === LayoutTypes.css_position_type_t.CSS_POSITION_RELATIVE) {
           nonFlexibleChildrenCount += 1;
+          nextContentDim = getDimWithMargin(child, mainAxis);
         }
       }
+
+      if (isNodeFlexWrap &&
+          isMainDimDefined &&
+          mainContentDim + nextContentDim > (definedMainDim as number) &&
+          i !== startLine) {
+        break;
+      }
+
+      if (isSimpleStackMain &&
+          // tslint:disable-next-line: max-line-length
+          (child.style.position_type !== LayoutTypes.css_position_type_t.CSS_POSITION_RELATIVE || isFlex(child))) {
+        isSimpleStackMain = false;
+        firstComplexMain = i;
+      }
+
+      if (isSimpleStackCross &&
+          (child.style.position_type !== LayoutTypes.css_position_type_t.CSS_POSITION_RELATIVE ||
+            // tslint:disable-next-line: max-line-length
+            (alignItem !== LayoutTypes.css_align_t.CSS_ALIGN_STRETCH && alignItem !== LayoutTypes.css_align_t.CSS_ALIGN_FLEX_START) ||
+            (alignItem === LayoutTypes.css_align_t.CSS_ALIGN_STRETCH && !isCrossDimDefined))) {
+        isSimpleStackCross = false;
+        firstComplexCross = i;
+      }
+
+      if (isSimpleStackMain) {
+        child.layout.position[pos[mainAxis]] += mainDim;
+
+        mainDim += getDimWithMargin(child, mainAxis);
+        crossDim = fmaxf(crossDim, boundAxis(child, crossAxis, getDimWithMargin(child, crossAxis)));
+      }
+      if (isSimpleStackCross) {
+        child.layout.position[pos[crossAxis]] += linesCrossDim + leadingPaddingAndBorderCross;
+      }
+
+      mainContentDim += nextContentDim;
+      endLine = i + 1;
     }
   }
 };

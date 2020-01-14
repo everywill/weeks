@@ -125,6 +125,10 @@ declare module 'LayoutTypes' {
     (layout: T, a: any): T,
   }
 
+  export interface nodeResolver<T> {
+    (node: css_node_t, a: any): T
+  }
+
   export interface boundAxis {
     (node: css_node_t, axis: css_flex_direction_t, value: number): number,
   }
