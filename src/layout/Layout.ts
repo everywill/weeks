@@ -194,11 +194,18 @@ const getTrailingPaddingAndBorder: LayoutTypes.styleGetter<number> = function (
   return getTrailingPadding(node, axis) + getTrailingBorder(node, axis);
 };
 
-const getMaginAxis: LayoutTypes.styleGetter<number> = function (
+const getMarginAxis: LayoutTypes.styleGetter<number> = function (
   node: LayoutTypes.css_node_t,
   axis: LayoutTypes.css_flex_direction_t,
 ) {
   return getLeadingMargin(node, axis) + getTrailingMargin(node, axis);
+};
+
+const getBorderAxis: LayoutTypes.styleGetter<number> = function (
+  node: LayoutTypes.css_node_t,
+  axis: LayoutTypes.css_flex_direction_t,
+) {
+  return getLeadingPaddingAndBorder(node, axis) + getTrailingBorder(node, axis);
 };
 
 const getPaddingAndBorderAxis: LayoutTypes.styleGetter<number> = function (
@@ -355,6 +362,9 @@ const layoutNodeImpl:LayoutTypes.layout = function (
   const isNodeFlexWrap: boolean = isFlexWrap(node);
   const justifyContent: LayoutTypes.css_justify_t = node.style.justify_content;
 
+  let child: LayoutTypes.css_node_t;
+  let axis: LayoutTypes.css_flex_direction_t;
+
   let firstAbsoluteChild: LayoutTypes.css_node_t | null = null;
   let currentAbsoluteChild: LayoutTypes.css_node_t | null = null;
 
@@ -392,7 +402,7 @@ const layoutNodeImpl:LayoutTypes.layout = function (
 
     // tslint:disable-next-line: no-increment-decrement
     for (let i: number = startLine; i < childCount; i ++) {
-      const child: LayoutTypes.css_node_t = node.get_child(node.context, i);
+      child = node.get_child(node.context, i);
 
       child.next_absolute_child = null;
       child.next_flex_child = null;
@@ -406,7 +416,7 @@ const layoutNodeImpl:LayoutTypes.layout = function (
           !isStyleDimDefined(child, crossAxis)) {
         child.layout.dimensions[dim[crossAxis]] = fmaxf(
           boundAxis(child, crossAxis, node.layout.dimensions[dim[crossAxis]] -
-            paddingAndBorderOnAxisCross - getMaginAxis(child, crossAxis)),
+            paddingAndBorderOnAxisCross - getMarginAxis(child, crossAxis)),
           getPaddingAndBorderAxis(child, crossAxis),
         );
       // tslint:disable-next-line: max-line-length
@@ -420,26 +430,26 @@ const layoutNodeImpl:LayoutTypes.layout = function (
         currentAbsoluteChild = child;
 
         // tslint:disable-next-line: no-increment-decrement
-        for (let ii = 0; ii < 2; ii++) {
-          const axis: LayoutTypes.css_flex_direction_t = (ii !== 0) ?
-            LayoutTypes.css_flex_direction_t.CSS_FLEX_DIRECTION_ROW :
-            LayoutTypes.css_flex_direction_t.CSS_FLEX_DIRECTION_COLUMN;
-          if (isLayoutDimDefined(node, axis) &&
-              !isStyleDimDefined(child, axis) &&
-              isPosDefined(child, leading[axis]) &&
-              isPosDefined(child, trailing[axis])
-              ) {
-            child.layout.dimensions[dim[axis]] = fmaxf(
-              boundAxis(child, axis, node.layout.dimensions[dim[axis]] -
-                getPaddingAndBorderAxis(node, axis) -
-                getMaginAxis(child, axis) -
-                getPosition(child, leading[axis]) -
-                getPosition(child, trailing[axis]),
-                ),
-              getPaddingAndBorderAxis(child, axis),
-            );
-          }
-        }
+        // for (let ii = 0; ii < 2; ii++) {
+        //   const axis: LayoutTypes.css_flex_direction_t = (ii !== 0) ?
+        //     LayoutTypes.css_flex_direction_t.CSS_FLEX_DIRECTION_ROW :
+        //     LayoutTypes.css_flex_direction_t.CSS_FLEX_DIRECTION_COLUMN;
+        //   if (isLayoutDimDefined(node, axis) &&
+        //       !isStyleDimDefined(child, axis) &&
+        //       isPosDefined(child, leading[axis]) &&
+        //       isPosDefined(child, trailing[axis])
+        //       ) {
+        //     child.layout.dimensions[dim[axis]] = fmaxf(
+        //       boundAxis(child, axis, node.layout.dimensions[dim[axis]] -
+        //         getPaddingAndBorderAxis(node, axis) -
+        //         getMaginAxis(child, axis) -
+        //         getPosition(child, leading[axis]) -
+        //         getPosition(child, trailing[axis]),
+        //         ),
+        //       getPaddingAndBorderAxis(child, axis),
+        //     );
+        //   }
+        // }
       }
 
       let nextContentDim: number = 0;
@@ -459,7 +469,7 @@ const layoutNodeImpl:LayoutTypes.layout = function (
 
         // smallest possible size of the child for computing remaining available space
         nextContentDim = getPaddingAndBorderAxis(child, mainAxis) +
-          getMaginAxis(child, mainAxis);
+          getMarginAxis(child, mainAxis);
       } else {
         if (child.style.position_type === LayoutTypes.css_position_type_t.CSS_POSITION_RELATIVE) {
           nonFlexibleChildrenCount += 1;
@@ -554,6 +564,39 @@ const layoutNodeImpl:LayoutTypes.layout = function (
   // layout child on cross-axis according to alignContent when multiple lines
   if (linesCount > 1 && isCrossDimDefined) {
 
+  }
+
+
+  // fill and position absolute-positioned child
+  currentAbsoluteChild = firstAbsoluteChild;
+  while (currentAbsoluteChild !== null) {
+    // tslint:disable-next-line: no-increment-decrement
+    for (let ii = 0; ii < 2; ii++) {
+      axis = (ii !== 0) ?
+        LayoutTypes.css_flex_direction_t.CSS_FLEX_DIRECTION_ROW :
+        LayoutTypes.css_flex_direction_t.CSS_FLEX_DIRECTION_COLUMN;
+      if (isLayoutDimDefined(node, axis) &&
+          !isStyleDimDefined(currentAbsoluteChild, axis) &&
+          isPosDefined(currentAbsoluteChild, leading[axis]) &&
+          isPosDefined(currentAbsoluteChild, trailing[axis])) {
+        currentAbsoluteChild.layout.dimensions[dim[axis]] = fmaxf(
+          boundAxis(currentAbsoluteChild, axis, node.layout.dimensions[dim[axis]] -
+            getBorderAxis(node, axis) -
+            getMarginAxis(currentAbsoluteChild, axis) -
+            getPosition(currentAbsoluteChild, leading[axis]) - 
+            getPosition(currentAbsoluteChild, trailing[axis])),
+          getPaddingAndBorderAxis(currentAbsoluteChild, axis),
+        );
+      }
+
+      if (isPosDefined(currentAbsoluteChild, trailing[axis]) &&
+          !isPosDefined(currentAbsoluteChild, leading[axis])) {
+        currentAbsoluteChild.layout.position[leading[axis]] =
+            node.layout.dimensions[dim[axis]] -
+            currentAbsoluteChild.layout.dimensions[dim[axis]] -
+            getPosition(currentAbsoluteChild, trailing[axis]);
+      }
+    }
   }
 };
 
