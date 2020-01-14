@@ -366,7 +366,9 @@ const layoutNodeImpl:LayoutTypes.layout = function (
   let startLine: number = 0;
   let endLine: number = 0;
 
+  let linesMainDim: number = 0;
   let linesCrossDim: number = 0;
+  let linesCount: number = 0;
 
   while (endLine < childCount) {
     let mainContentDim: number = 0;
@@ -501,6 +503,57 @@ const layoutNodeImpl:LayoutTypes.layout = function (
       mainContentDim += nextContentDim;
       endLine = i + 1;
     }
+
+    // postion children(not absolute-positioned) on main-axis
+    let leadingMainDim: number = 0;
+    let betweenMainDim: number = 0;
+
+    let remainingMainDim: number = 0;
+    if (isMainDimDefined) {
+      remainingMainDim = definedMainDim as number - mainContentDim;
+    } else {
+      remainingMainDim = fmaxf(mainContentDim, 0) - mainContentDim;
+    }
+
+    if (flexibleChildrenCount !== 0) {
+      let flexibleMainDim: number = remainingMainDim / totalFlexible;
+      let baseMainDim: number;
+      let boundMainDim: number;
+
+      currentFlexChild = firstFlexChild;
+      while (currentFlexChild !== null) {
+        baseMainDim = flexibleMainDim * currentFlexChild.style.flex +
+          getPaddingAndBorderAxis(currentFlexChild, mainAxis);
+      }
+    } else if (justifyContent !== LayoutTypes.css_justify_t.CSS_JUSTIFY_FLEX_START) {
+      if (justifyContent === LayoutTypes.css_justify_t.CSS_JUSTIFY_CENTER) {
+        leadingMainDim = remainingMainDim / 2;
+      } else if (justifyContent === LayoutTypes.css_justify_t.CSS_JUSTIFY_FLEX_END) {
+        leadingMainDim = remainingMainDim;
+      } else if (justifyContent === LayoutTypes.css_justify_t.CSS_JUSTIFY_SPACE_BETWEEN) {
+        remainingMainDim = fmaxf(remainingMainDim, 0);
+        if (flexibleChildrenCount + nonFlexibleChildrenCount - 1 !== 0) {
+          betweenMainDim =
+            remainingMainDim / (flexibleChildrenCount + nonFlexibleChildrenCount - 1);
+        } else {
+          betweenMainDim = 0;
+        }
+      } else if (justifyContent === LayoutTypes.css_justify_t.CSS_JUSTIFY_SPACE_AROUND) {
+        betweenMainDim = remainingMainDim / (flexibleChildrenCount + nonFlexibleChildrenCount);
+        leadingMainDim = betweenMainDim / 2;
+      }
+    }
+
+    linesCrossDim += crossDim;
+    linesMainDim = fmaxf(linesMainDim, mainDim);
+    linesCount += 1;
+    startLine = endLine;
+  }
+
+
+  // layout child on cross-axis according to alignContent when multiple lines
+  if (linesCount > 1 && isCrossDimDefined) {
+
   }
 };
 
