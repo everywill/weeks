@@ -358,6 +358,13 @@ function setDimensionFromStyle(node, axis) {
   );
 }
 
+function getRelativePosition(node, axis) {
+  if (node.style[leading[axis]] !== undefined) {
+    return getPosition(node, leading[axis]);
+  }
+  return -getPosition(node, trailing[axis]);
+}
+
 function fillNodes(node) {
   if (!node.layout || node.isDirty) {
     node.layout = {
@@ -365,8 +372,8 @@ function fillNodes(node) {
       height: undefined,
       top: 0,
       left: 0,
-      right: 0,
-      bottom: 0
+      right: undefined,
+      bottom: undefined
     };
   }
 
@@ -393,6 +400,15 @@ function layoutNodeImpl(node, parentMaxWidth, parentDirection) {
 
   // Set the resolved resolution in the node's layout
   node.layout.direction = direction;
+
+  node.layout[leading[mainAxis]] += getLeadingMargin(node, mainAxis) +
+    getRelativePosition(node, mainAxis);
+  node.layout[trailing[mainAxis]] += getTrailingMargin(node, mainAxis) +
+    getRelativePosition(node, mainAxis);
+  node.layout[leading[crossAxis]] += getLeadingMargin(node, crossAxis) +
+    getRelativePosition(node, crossAxis);
+  node.layout[trailing[crossAxis]] += getTrailingMargin(node, crossAxis) +
+    getRelativePosition(node, crossAxis);
 
   const childCount = node.children.length;
   const paddingAndBorderAxisResolvedRow = getPaddingAndBorderAxis(node, resolvedRowAxis);
@@ -432,8 +448,26 @@ function layoutNodeImpl(node, parentMaxWidth, parentDirection) {
   let linesCount = 0;
   
   while(endLine < childCount) {
+    let mainContentDim = 0;
+
+    let flexibleChildrenCount = 0;
+    let totalFlexible = 0;
+    let nonFlexibleChildrenCount = 0;
+
+    let isSimpleStackMain =
+        (isMainDimDefined && justifyContent === CSS_JUSTIFY_FLEX_START) ||
+        (!isMainDimDefined && justifyContent !== CSS_JUSTIFY_CENTER);
+    let firstComplexMain = (isSimpleStackMain ? childCount : startLine);
+
+    let isSimpleStackCross = true;
+    let firstComplexCross = childCount;
+
+    let firstFlexChild = null;
+    let currentFlexChild = null;
+
     let mainDim = leadingPaddingAndBorderMain;
     let crossDim = 0;
+
     let maxWidth;
     for (i = startLine; i < childCount; i++) {
       child = node.children[i];
@@ -463,7 +497,7 @@ function layoutNodeImpl(node, parentMaxWidth, parentDirection) {
               isPosDefined(child, trailing[axis])) {
             child.layout[dim[axis]] = fmaxf(
               boundAxis(child, axis, node.layout[dim[axis]] -
-                getPaddingAndBorderAxis(node, axis) -
+                getBorderAxis(node, axis) -
                 getMarginAxis(child, axis) -
                 getPosition(child, leading[axis]) -
                 getPosition(child, trailing[axis])),
@@ -490,7 +524,55 @@ function layoutNodeImpl(node, parentMaxWidth, parentDirection) {
         layoutNode(child, maxWidth, direction);
       }
 
+      if (isSimpleStackMain &&
+          (getPositionType(child) !== CSS_POSITION_RELATIVE || isFlex(child))) {
+        isSimpleStackMain = false;
+        firstComplexMain = i;
+      }
+
+      if (isSimpleStackCross &&
+          (getPositionType(child) !== CSS_POSITION_RELATIVE ||
+              (alignItem !== CSS_ALIGN_STRETCH && alignItem !== CSS_ALIGN_FLEX_START) ||
+              isUndefined(child.layout[dim[crossAxis]]))) {
+        isSimpleStackCross = false;
+        firstComplexCross = i;
+      }
+
       endLine = i + 1;
+    }
+
+    for (i = firstComplexMain; i < endLine; i++) {
+      child = node.children[i];
+
+      if (getPositionType(child) === CSS_POSITION_ABSOLUTE &&
+          isPosDefined(child, leading[mainAxis])) {
+        // In case the child is position absolute and has left/top being
+        // defined, we override the position to whatever the user said
+        // (and margin/border).
+        child.layout[pos[mainAxis]] = getPosition(child, leading[mainAxis]) +
+          getLeadingBorder(node, mainAxis) +
+          getLeadingMargin(child, mainAxis);
+      } else {
+        child.layout[pos[mainAxis]] += mainDim;
+      }
+    }
+
+    for (i = firstComplexCross; i < endLine; i++) {
+      child = node.children[i];
+
+      if (getPositionType(child) === CSS_POSITION_ABSOLUTE &&
+          isPosDefined(child, leading[crossAxis])) {
+        // In case the child is absolutely positionned and has a
+        // top/left/bottom/right being set, we override all the previously
+        // computed positions to set it correctly.
+        child.layout[pos[crossAxis]] = getPosition(child, leading[crossAxis]) +
+          getLeadingBorder(node, crossAxis) +
+          getLeadingMargin(child, crossAxis);
+
+      } else {
+        const leadingCrossDim = leadingPaddingAndBorderCross;
+        child.layout[pos[crossAxis]] += linesCrossDim + leadingCrossDim;
+      }
     }
 
     linesMainDim = fmaxf(linesMainDim, mainDim);
@@ -512,6 +594,43 @@ function layoutNodeImpl(node, parentMaxWidth, parentDirection) {
       boundAxis(node, crossAxis, linesCrossDim + paddingAndBorderAxisCross),
       paddingAndBorderAxisCross,
     );
+  }
+
+  currentAbsoluteChild = firstAbsoluteChild;
+  while (currentAbsoluteChild !== null) {
+    // Pre-fill dimensions when using absolute position and both offsets for
+    // the axis are defined (either both left and right or top and bottom).
+    for (ii = 0; ii < 2; ii++) {
+      axis = (ii !== 0) ? CSS_FLEX_DIRECTION_ROW : CSS_FLEX_DIRECTION_COLUMN;
+
+      if (!isUndefined(node.layout[dim[axis]]) &&
+          !isDimDefined(currentAbsoluteChild, axis) &&
+          isPosDefined(currentAbsoluteChild, leading[axis]) &&
+          isPosDefined(currentAbsoluteChild, trailing[axis])) {
+        currentAbsoluteChild.layout[dim[axis]] = fmaxf(
+          boundAxis(currentAbsoluteChild, axis, node.layout[dim[axis]] -
+            getBorderAxis(node, axis) -
+            getMarginAxis(currentAbsoluteChild, axis) -
+            getPosition(currentAbsoluteChild, leading[axis]) -
+            getPosition(currentAbsoluteChild, trailing[axis])
+          ),
+          // You never want to go smaller than padding
+          getPaddingAndBorderAxis(currentAbsoluteChild, axis)
+        );
+      }
+
+      if (isPosDefined(currentAbsoluteChild, trailing[axis]) &&
+          !isPosDefined(currentAbsoluteChild, leading[axis])) {
+        currentAbsoluteChild.layout[leading[axis]] =
+          node.layout[dim[axis]] -
+          currentAbsoluteChild.layout[dim[axis]] -
+          getPosition(currentAbsoluteChild, trailing[axis]);
+      }
+    }
+
+    child = currentAbsoluteChild;
+    currentAbsoluteChild = currentAbsoluteChild.nextAbsoluteChild;
+    child.nextAbsoluteChild = null;
   }
 }
 
@@ -563,5 +682,3 @@ module.exports = function (node) {
   fillNodes(node);
   layoutNode(node);
 }
-
-
