@@ -12,7 +12,6 @@ const node = {
       margin: 5,
       borderWidth: 3,
       padding: 10,
-      position: 'absolute',
       left: 10,
     }
   }, {

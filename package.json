@@ -7,6 +7,6 @@
     "tslint-config-airbnb": "^5.11.2"
   },
   "scripts": {
-    "debug": "node --inspect-brk ./__test__/absolute --verbose"
+    "debug": "node --inspect-brk ./__test__/non-flex --verbose"
   }
 }

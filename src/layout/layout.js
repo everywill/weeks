@@ -455,8 +455,7 @@ function layoutNodeImpl(node, parentMaxWidth, parentDirection) {
     let nonFlexibleChildrenCount = 0;
 
     let isSimpleStackMain =
-        (isMainDimDefined && justifyContent === CSS_JUSTIFY_FLEX_START) ||
-        (!isMainDimDefined && justifyContent !== CSS_JUSTIFY_CENTER);
+        (isMainDimDefined && justifyContent === CSS_JUSTIFY_FLEX_START) || !isMainDimDefined;
     let firstComplexMain = (isSimpleStackMain ? childCount : startLine);
 
     let isSimpleStackCross = true;
@@ -476,7 +475,17 @@ function layoutNodeImpl(node, parentMaxWidth, parentDirection) {
 
       const alignItem = getAlignItem(node, child);
 
-      if (getPositionType(child) === CSS_POSITION_ABSOLUTE) {
+      if (alignItem === CSS_ALIGN_STRETCH &&
+          getPositionType(child) === CSS_POSITION_RELATIVE &&
+          isCrossDimDefined &&
+          !isDimDefined(child, crossAxis)) {
+        child.layout[dim[crossAxis]] = fmaxf(
+          boundAxis(child, crossAxis, node.layout[dim[crossAxis]] -
+            paddingAndBorderAxisCross - getMarginAxis(child, crossAxis)),
+          // You never want to go smaller than padding
+          getPaddingAndBorderAxis(child, crossAxis)
+        );
+      } else if (getPositionType(child) === CSS_POSITION_ABSOLUTE) {
         // Store a private linked list of absolutely positioned children
         // so that we can efficiently traverse them later.
         if (firstAbsoluteChild === null) {
@@ -521,7 +530,26 @@ function layoutNodeImpl(node, parentMaxWidth, parentDirection) {
               paddingAndBorderAxisResolvedRow;
           }
         }
+
         layoutNode(child, maxWidth, direction);
+
+        if (getPositionType(child) === CSS_POSITION_RELATIVE) {
+          nonFlexibleChildrenCount++;
+          // At this point we know the final size and margin of the element.
+          nextContentDim = getDimWithMargin(child, mainAxis);
+        }
+      }
+
+      // The element we are about to add would make us go to the next line
+      if (isNodeFlexWrap &&
+          isMainDimDefined &&
+          mainContentDim + nextContentDim > definedMainDim &&
+          // If there's only one element, then it's bigger than the content
+          // and needs its own line
+          i !== startLine) {
+        nonFlexibleChildrenCount--;
+        // alreadyComputedNextLayout = 1;
+        break;
       }
 
       if (isSimpleStackMain &&
@@ -532,14 +560,62 @@ function layoutNodeImpl(node, parentMaxWidth, parentDirection) {
 
       if (isSimpleStackCross &&
           (getPositionType(child) !== CSS_POSITION_RELATIVE ||
-              (alignItem !== CSS_ALIGN_STRETCH && alignItem !== CSS_ALIGN_FLEX_START) ||
+            (alignItem !== CSS_ALIGN_STRETCH && alignItem !== CSS_ALIGN_FLEX_START) ||
               isUndefined(child.layout[dim[crossAxis]]))) {
         isSimpleStackCross = false;
         firstComplexCross = i;
       }
 
+      if (isSimpleStackMain) {
+        child.layout[pos[mainAxis]] += mainDim;
+
+        mainDim += getDimWithMargin(child, mainAxis);
+        crossDim = fmaxf(crossDim, boundAxis(child, crossAxis, getDimWithMargin(child, crossAxis)));
+      }
+
+      if (isSimpleStackCross) {
+        child.layout[pos[crossAxis]] += linesCrossDim + leadingPaddingAndBorderCross;
+      }
+
+      mainContentDim += nextContentDim;
       endLine = i + 1;
     }
+
+    let leadingMainDim = 0;
+    let betweenMainDim = 0;
+
+    // The remaining available space that needs to be allocated
+    let remainingMainDim = 0;
+    if (isMainDimDefined) {
+      remainingMainDim = definedMainDim - mainContentDim;
+    } else {
+      remainingMainDim = fmaxf(mainContentDim, 0) - mainContentDim;
+    }
+
+    if (flexibleChildrenCount !== 0) {
+
+    } else if (justifyContent !== CSS_JUSTIFY_FLEX_START) {
+      if (justifyContent === CSS_JUSTIFY_CENTER) {
+        leadingMainDim = remainingMainDim / 2;
+      } else if (justifyContent === CSS_JUSTIFY_FLEX_END) {
+        leadingMainDim = remainingMainDim;
+      } else if (justifyContent === CSS_JUSTIFY_SPACE_BETWEEN) {
+        remainingMainDim = fmaxf(remainingMainDim, 0);
+        if (flexibleChildrenCount + nonFlexibleChildrenCount - 1 !== 0) {
+          betweenMainDim = remainingMainDim /
+            (flexibleChildrenCount + nonFlexibleChildrenCount - 1);
+        } else {
+          betweenMainDim = 0;
+        }
+      } else if (justifyContent === CSS_JUSTIFY_SPACE_AROUND) {
+        // Space on the edges is half of the space between elements
+        betweenMainDim = remainingMainDim /
+          (flexibleChildrenCount + nonFlexibleChildrenCount);
+        leadingMainDim = betweenMainDim / 2;
+      }
+    }
+
+    mainDim += leadingMainDim;
 
     for (i = firstComplexMain; i < endLine; i++) {
       child = node.children[i];
@@ -554,7 +630,24 @@ function layoutNodeImpl(node, parentMaxWidth, parentDirection) {
           getLeadingMargin(child, mainAxis);
       } else {
         child.layout[pos[mainAxis]] += mainDim;
+
+        if (getPositionType(child) === CSS_POSITION_RELATIVE) {
+          // The main dimension is the sum of all the elements dimension plus
+          // the spacing.
+          mainDim += betweenMainDim + getDimWithMargin(child, mainAxis);
+          // The cross dimension is the max of the elements dimension since there
+          // can only be one element in that cross dimension.
+          crossDim = fmaxf(crossDim, boundAxis(child, crossAxis, getDimWithMargin(child, crossAxis)));
+        }
       }
+    }
+
+    let containerCrossAxis = node.layout[dim[crossAxis]];
+    if (!isCrossDimDefined) {
+      containerCrossAxis = fmaxf(
+        boundAxis(node, crossAxis, crossDim + paddingAndBorderAxisCross),
+        paddingAndBorderAxisCross
+      );
     }
 
     for (i = firstComplexCross; i < endLine; i++) {
@@ -570,7 +663,29 @@ function layoutNodeImpl(node, parentMaxWidth, parentDirection) {
           getLeadingMargin(child, crossAxis);
 
       } else {
-        const leadingCrossDim = leadingPaddingAndBorderCross;
+        let leadingCrossDim = leadingPaddingAndBorderCross;
+        if (getPositionType(child) === CSS_POSITION_RELATIVE) {
+          const alignItem = getAlignItem(node, child);
+          if (alignItem === CSS_ALIGN_STRETCH) {
+            if (isUndefined(child.layout[dim[crossAxis]])) {
+              child.layout[dim[crossAxis]] = fmaxf(
+                boundAxis(child, crossAxis, containerCrossAxis -
+                  paddingAndBorderAxisCross - getMarginAxis(child, crossAxis)),
+                getPaddingAndBorderAxis(child, crossAxis)
+              );
+            }
+          } else if (alignItem !== CSS_ALIGN_FLEX_START) {
+            let remainingCrossDim = containerCrossAxis -
+              paddingAndBorderAxisCross - getDimWithMargin(child, crossAxis);
+
+            if (alignItem === CSS_ALIGN_CENTER) {
+              leadingCrossDim += remainingCrossDim / 2;
+            } else { // CSS_ALIGN_FLEX_END
+              leadingCrossDim += remainingCrossDim;
+            }
+          }
+        }
+ 
         child.layout[pos[crossAxis]] += linesCrossDim + leadingCrossDim;
       }
     }
