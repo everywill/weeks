@@ -365,6 +365,10 @@ function getRelativePosition(node, axis) {
   return -getPosition(node, trailing[axis]);
 }
 
+function isMeasureDefined(node) {
+  return node.measure !== undefined;
+}
+
 function fillNodes(node) {
   if (!node.layout || node.isDirty) {
     node.layout = {
@@ -412,6 +416,44 @@ function layoutNodeImpl(node, parentMaxWidth, parentDirection) {
 
   const childCount = node.children.length;
   const paddingAndBorderAxisResolvedRow = getPaddingAndBorderAxis(node, resolvedRowAxis);
+
+  if (isMeasureDefined(node)) {
+    const isResolvedRowDimDefined = !isUndefined(node.layout[dim[resolvedRowAxis]]);
+
+    let width = CSS_UNDEFINED;
+    if (isDimDefined(node, resolvedRowAxis)) {
+      width = node.style.width;
+    } else if (isResolvedRowDimDefined) {
+      width = node.layout[dim[resolvedRowAxis]];
+    } else {
+      width = parentMaxWidth -
+        getMarginAxis(node, resolvedRowAxis);
+    }
+    width -= paddingAndBorderAxisResolvedRow;
+
+    // We only need to give a dimension for the text if we haven't got any
+    // for it computed yet. It can either be from the style attribute or because
+    // the element is flexible.
+    const isRowUndefined = !isDimDefined(node, resolvedRowAxis) && !isResolvedRowDimDefined;
+    const isColumnUndefined = !isDimDefined(node, CSS_FLEX_DIRECTION_COLUMN) &&
+      isUndefined(node.layout[dim[CSS_FLEX_DIRECTION_COLUMN]]);
+
+    if (isRowUndefined || isColumnUndefined) {
+      const measureDim = node.measure(width);
+      
+      if (isRowUndefined) {
+        node.layout.width = measureDim.width +
+          paddingAndBorderAxisResolvedRow;
+      }
+      if (isColumnUndefined) {
+        node.layout.height = measureDim.height +
+          getPaddingAndBorderAxis(node, CSS_FLEX_DIRECTION_COLUMN);
+      }
+    }
+    if (childCount === 0) {
+      return;
+    }
+  }
 
   const isNodeFlexWrap = isFlexWrap(node);
 
