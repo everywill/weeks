@@ -520,7 +520,11 @@ function layoutNodeImpl(node, parentMaxWidth, parentDirection) {
       }
 
       if (isMainDimDefined && isFlex(child)) {
-
+        // Even if we don't know its exact size yet, we already know the padding,
+        // border and margin. We'll use this partial information, which represents
+        // the smallest possible size for the child, to compute the remaining
+        // available space.
+        nextContentDim = getPaddingAndBorderAxis(child, mainAxis) + getMarginAxis(child, mainAxis);
       } else {
         maxWidth = CSS_UNDEFINED;
         if (!isMainRowDirection) {
@@ -550,9 +554,21 @@ function layoutNodeImpl(node, parentMaxWidth, parentDirection) {
           // If there's only one element, then it's bigger than the content
           // and needs its own line
           i !== startLine) {
+            
         nonFlexibleChildrenCount--;
         alreadyComputedNextLayout = 1;
         break;
+      } else if (isMainDimDefined && isFlex(child)) {
+        flexibleChildrenCount++;
+        totalFlexible += child.style.flex;
+
+        if (firstFlexChild === null) {
+          firstFlexChild = child;
+        }
+        if (currentFlexChild !== null) {
+          currentFlexChild.nextFlexChild = child;
+        }
+        currentFlexChild = child;
       }
 
       if (isSimpleStackMain &&
@@ -597,6 +613,54 @@ function layoutNodeImpl(node, parentMaxWidth, parentDirection) {
     }
 
     if (flexibleChildrenCount !== 0) {
+      let flexibleMainDim = remainingMainDim / totalFlexible;
+      let baseMainDim;
+      let boundMainDim;
+
+      currentFlexChild = firstFlexChild;
+      while (currentFlexChild !== null) {
+        baseMainDim = flexibleMainDim * currentFlexChild.style.flex +
+            getPaddingAndBorderAxis(currentFlexChild, mainAxis);
+        boundMainDim = boundAxis(currentFlexChild, mainAxis, baseMainDim);
+
+        if (baseMainDim !== boundMainDim) {
+          remainingMainDim -= boundMainDim - getDimWithMargin(node, mainAxis);
+          totalFlexible -= currentFlexChild.style.flex;
+        }
+
+        currentFlexChild = currentFlexChild.nextFlexChild;
+      }
+      flexibleMainDim = remainingMainDim / totalFlexible;
+
+      if (flexibleMainDim < 0) {
+        flexibleMainDim = 0;
+      }
+
+      currentFlexChild = firstFlexChild;
+      while (currentFlexChild !== null) {
+        // At this point we know the final size of the element in the main
+        // dimension
+        currentFlexChild.layout[dim[mainAxis]] = boundAxis(currentFlexChild, mainAxis,
+          flexibleMainDim * currentFlexChild.style.flex + getPaddingAndBorderAxis(currentFlexChild, mainAxis)
+        );
+
+        maxWidth = CSS_UNDEFINED;
+        if (isDimDefined(node, resolvedRowAxis)) {
+          maxWidth = node.layout[dim[resolvedRowAxis]] -
+            paddingAndBorderAxisResolvedRow;
+        } else if (!isMainRowDirection) {
+          maxWidth = parentMaxWidth -
+            getMarginAxis(node, resolvedRowAxis) -
+            paddingAndBorderAxisResolvedRow;
+        }
+
+        // And we recursively call the layout algorithm for this child
+        layoutNode(currentFlexChild, maxWidth, direction);
+
+        child = currentFlexChild;
+        currentFlexChild = currentFlexChild.nextFlexChild;
+        child.nextFlexChild = null;
+      }
 
     } else if (justifyContent !== CSS_JUSTIFY_FLEX_START) {
       if (justifyContent === CSS_JUSTIFY_CENTER) {
