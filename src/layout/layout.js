@@ -470,6 +470,8 @@ function layoutNodeImpl(node, parentMaxWidth, parentDirection) {
     let maxWidth;
     for (i = startLine; i < childCount; i++) {
       child = node.children[i];
+      child.lineIndex = linesCount;
+
       child.nextAbsoluteChild = null;
       child.nextFlexChild = null;
 
@@ -530,9 +532,10 @@ function layoutNodeImpl(node, parentMaxWidth, parentDirection) {
               paddingAndBorderAxisResolvedRow;
           }
         }
-
-        layoutNode(child, maxWidth, direction);
-
+        if (alreadyComputedNextLayout === 0) {
+          layoutNode(child, maxWidth, direction);
+        }
+        
         if (getPositionType(child) === CSS_POSITION_RELATIVE) {
           nonFlexibleChildrenCount++;
           // At this point we know the final size and margin of the element.
@@ -548,7 +551,7 @@ function layoutNodeImpl(node, parentMaxWidth, parentDirection) {
           // and needs its own line
           i !== startLine) {
         nonFlexibleChildrenCount--;
-        // alreadyComputedNextLayout = 1;
+        alreadyComputedNextLayout = 1;
         break;
       }
 
@@ -577,6 +580,7 @@ function layoutNodeImpl(node, parentMaxWidth, parentDirection) {
         child.layout[pos[crossAxis]] += linesCrossDim + leadingPaddingAndBorderCross;
       }
 
+      alreadyComputedNextLayout = 0;
       mainContentDim += nextContentDim;
       endLine = i + 1;
     }
@@ -667,12 +671,22 @@ function layoutNodeImpl(node, parentMaxWidth, parentDirection) {
         if (getPositionType(child) === CSS_POSITION_RELATIVE) {
           const alignItem = getAlignItem(node, child);
           if (alignItem === CSS_ALIGN_STRETCH) {
-            if (isUndefined(child.layout[dim[crossAxis]])) {
+            if (!isDimDefined(child, crossAxis)) {
+              const dimCrossAxis = child.layout[dim[crossAxis]];
               child.layout[dim[crossAxis]] = fmaxf(
                 boundAxis(child, crossAxis, containerCrossAxis -
                   paddingAndBorderAxisCross - getMarginAxis(child, crossAxis)),
                 getPaddingAndBorderAxis(child, crossAxis)
               );
+
+              if (dimCrossAxis !== child.layout[dim[crossAxis]]) {
+                child.layout[leading[mainAxis]] -= getLeadingMargin(child, mainAxis) + getRelativePosition(child, mainAxis);
+                child.layout[trailing[mainAxis]] -= getTrailingMargin(child, mainAxis) + getRelativePosition(child, mainAxis);
+                child.layout[leading[crossAxis]] -= getLeadingMargin(child, crossAxis) + getRelativePosition(child, crossAxis);
+                child.layout[trailing[crossAxis]] -= getTrailingMargin(child, crossAxis) + getRelativePosition(child, crossAxis);
+
+                layoutNode(child, maxWidth, direction);
+              }
             }
           } else if (alignItem !== CSS_ALIGN_FLEX_START) {
             let remainingCrossDim = containerCrossAxis -
@@ -696,7 +710,69 @@ function layoutNodeImpl(node, parentMaxWidth, parentDirection) {
     startLine = endLine;
   }
 
-  if (linesCount > 1 && isCrossDimDefined) {}
+  if (linesCount > 1 && isCrossDimDefined) {
+    const nodeCrossAxisInnerSize = node.layout[dim[crossAxis]] - paddingAndBorderAxisCross;
+    const remainingAlignContentDim = nodeCrossAxisInnerSize - linesCrossDim;
+
+    let crossDimLead = 0;
+    let currentLead = leadingPaddingAndBorderCross;
+
+    const alignContent = getAlignContent(node);
+    if (alignContent === CSS_ALIGN_FLEX_END) {
+      currentLead += remainingAlignContentDim;
+    } else if (alignContent === CSS_ALIGN_CENTER) {
+      currentLead += remainingAlignContentDim / 2;
+    } else if (alignContent === CSS_ALIGN_STRETCH) {
+      if (nodeCrossAxisInnerSize > linesCrossDim) {
+        crossDimLead = (remainingAlignContentDim / linesCount);
+      }
+    }
+
+    let endIndex = 0;
+    for (i = 0; i < linesCount; i++) {
+      let startIndex = endIndex;
+
+      let lineHeight = 0;
+      for (ii = startIndex; ii < childCount; ii++) {
+        child = node.children[ii];
+        if (getPositionType(child) !== CSS_POSITION_RELATIVE) {
+          continue;
+        }
+        if (child.lineIndex !== i) {
+          break;
+        }
+        if (!isUndefined(child.layout[dim[crossAxis]])) {
+          lineHeight = fmaxf(
+            lineHeight,
+            child.layout[dim[crossAxis]] + getMarginAxis(child, crossAxis)
+          );
+        }
+      }
+      endIndex = ii;
+
+      for (ii = startIndex; ii < endIndex; ++ii) {
+        child = node.children[ii];
+        if (getPositionType(child) !== CSS_POSITION_RELATIVE) {
+          continue;
+        }
+        const alignContentAlignItem = getAlignItem(node, child);
+        if (alignContentAlignItem === CSS_ALIGN_FLEX_START) {
+          child.layout[leading[crossAxis]] = currentLead + getLeadingMargin(child, crossAxis);
+        } else if (alignContentAlignItem === CSS_ALIGN_FLEX_END) {
+          child.layout[leading[crossAxis]] = currentLead + lineHeight - getTrailingMargin(child, crossAxis) - child.layout[dim[crossAxis]];
+        } else if (alignContentAlignItem === CSS_ALIGN_CENTER) {
+          const childHeight = child.layout[dim[crossAxis]];
+          child.layout[leading[crossAxis]] = currentLead + (lineHeight - childHeight) / 2;
+        } else if (alignContentAlignItem === CSS_ALIGN_STRETCH) {
+          child.layout[leading[crossAxis]] = currentLead + getLeadingMargin(child, crossAxis);
+          // TODO(prenaux): Correctly set the height of items with undefined
+          //                (auto) crossAxis dimension.
+        }
+      }
+
+      currentLead += lineHeight;
+    }
+  }
   
   if (!isMainDimDefined) {
     node.layout[dim[mainAxis]] = fmaxf(
