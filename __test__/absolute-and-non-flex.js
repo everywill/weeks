@@ -2,24 +2,24 @@ const computeLayout = require('../src/layout/layout');
 
 const node = {
   style: {
-    margin: 4,
+    margin: 1,
+    width: 24,
     borderWidth: 2,
-    padding: 8,
-    flexDirection: 'column',
+    padding: 3,
+    flexWrap: 'wrap',
+    flexDirection: 'row',
   },
   children: [{
     style: {
-      margin: 5,
+      margin: 2,
       borderWidth: 3,
-      padding: 10,
-      left: 10,
+      padding: 4,
     }
   }, {
     style: {
-      margin: 1,
-      borderWidth: 1,
-      padding: 11,
-      position: 'absolute',
+      margin: 3,
+      borderWidth: 2,
+      padding: 1,
     }
   }]
 };

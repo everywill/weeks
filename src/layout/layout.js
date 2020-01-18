@@ -765,8 +765,6 @@ function layoutNodeImpl(node, parentMaxWidth, parentDirection) {
           child.layout[leading[crossAxis]] = currentLead + (lineHeight - childHeight) / 2;
         } else if (alignContentAlignItem === CSS_ALIGN_STRETCH) {
           child.layout[leading[crossAxis]] = currentLead + getLeadingMargin(child, crossAxis);
-          // TODO(prenaux): Correctly set the height of items with undefined
-          //                (auto) crossAxis dimension.
         }
       }
 
