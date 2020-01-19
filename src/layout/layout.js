@@ -855,6 +855,7 @@ function layoutNodeImpl(node, parentMaxWidth, parentDirection) {
         }
       }
       endIndex = ii;
+      lineHeight += crossDimLead;
 
       for (ii = startIndex; ii < endIndex; ++ii) {
         child = node.children[ii];
