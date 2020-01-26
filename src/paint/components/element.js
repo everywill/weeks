@@ -1,6 +1,12 @@
+let uuid = 0;
+
 class Element {
-  constructor() {
+  constructor({
+    id = ++uuid,
+  }) {
     this.children = {};
+    this.parent = null;
+    this.id = id;
   }
 }
 
