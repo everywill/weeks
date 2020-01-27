@@ -3,11 +3,24 @@ let uuid = 0;
 class Element {
   constructor({
     id = ++uuid,
+    style = {},
   }) {
+    this.id = id;
+    this.style = style;
+    this.cssNode = {};
     this.children = {};
     this.parent = null;
-    this.id = id;
   }
+
+  insertSubview() {
+    throw 'should be reimplemented in sub-class';
+  }
+
+  fireEvent() {}
+
+  addEvent() {}
+
+  removeEvent() {}
 }
 
 module.exports = Element;
