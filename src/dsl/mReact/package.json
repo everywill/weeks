@@ -1,0 +1,20 @@
+{
+  "name": "mini-react",
+  "version": "1.0.0",
+  "main": "dist/mReact.umd.js",
+  "module": "dist/mReact.es.js",
+  "devDependencies": {
+    "rollup": "^1.27.2"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build:module": "rollup src/index.js -f esm -n mReact -o dist/mReact.es.js",
+    "build:main": "rollup src/index.js -f umd -n mReact -o dist/mReact.umd.js",
+    "build": "npm run build:module && npm run build:main",
+    "prepublishOnly": "npm run build"
+  },
+  "license": "MIT",
+  "author": "everywill <everywillatchina@gmail.com>"
+}
