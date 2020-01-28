@@ -28,8 +28,12 @@ export default class Element {
     });
   }
 
-  insertSubview(childNode) {
-    throw 'should be reimplemented in sub-class';
+  insertChildComponent(childNode) {
+    
+  }
+
+  removeFromParentComponent() {
+
   }
 
   fireEvent(event, ...args) {
