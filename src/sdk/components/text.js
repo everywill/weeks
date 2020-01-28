@@ -1,6 +1,4 @@
 
-const Element = require('./element');
+import Element from './element';
 
-class Text extends Element {}
-
-module.exports = Text;
+export default class Text extends Element {}

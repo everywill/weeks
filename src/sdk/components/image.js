@@ -1,5 +1,3 @@
-const Element = require('./element');
+import Element from './element';
 
-class Image extends Element {}
-
-module.exports = Image;
+export default class Image extends Element {}

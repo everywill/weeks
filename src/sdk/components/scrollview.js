@@ -1,5 +1,3 @@
-const Element = require('./element');
+import Element from './element';
 
-class ScrollView extends Element {}
-
-module.exports = ScrollView;
+export default class ScrollView extends Element {}

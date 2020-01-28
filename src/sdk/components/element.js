@@ -1,6 +1,16 @@
-let uuid = 0;
+const Emitter = require('../utils/event-emitter');
+const EE = new Emitter();
 
-class Element {
+let uuid = 0;
+const elementEvents = ['click', 'touchstart', 'touchmove', 'touchend', 'touchcancel'];
+
+const toEventName = (event, id) => {
+  if (elementEvent.indexOf(event) !== -1) {
+    return `element-${id}-${event}`;
+  }
+}
+
+export default class Element {
   constructor({
     id = ++uuid,
     style = {},
@@ -9,18 +19,28 @@ class Element {
     this.style = style;
     this.cssNode = {};
     this.children = {};
-    this.parent = null;
+    this.parentNode = null;
+
+    elementEvents.forEach((eventName) => {
+      this.addEvent(eventName, (e, msg) => {
+        this.parent && this.parent.fireEvent(eventName, e, msg);
+      })
+    });
   }
 
-  insertSubview() {
+  insertSubview(childNode) {
     throw 'should be reimplemented in sub-class';
   }
 
-  fireEvent() {}
+  fireEvent(event, ...args) {
+    EE.emit(toEventName(event, this.id), ...args);
+  }
 
-  addEvent() {}
+  addEvent(event, callback) {
+    EE.on(toEventName(event, this.id), callback);
+  }
 
-  removeEvent() {}
+  removeEvent(event, callback) {
+    EE.off(toEventName(event, this.id), callback);
+  }
 }
-
-module.exports = Element;

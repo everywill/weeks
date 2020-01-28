@@ -1,5 +1,3 @@
-const Element = require('./element');
+import Element from './element';
 
-class View extends Element {}
-
-module.exports = View;
+export default class View extends Element {}
