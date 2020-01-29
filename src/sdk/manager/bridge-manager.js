@@ -4,4 +4,8 @@ export default class BridgeManager {
   constructor() {
     this.bridgeCtx = new BridgeContext();
   }
+
+  executeJsFramework(script) {
+    this.bridgeCtx.executeJsFramework(script);
+  }
 }

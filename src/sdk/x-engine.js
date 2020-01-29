@@ -1,13 +1,14 @@
 import { View, Text, Image, ScrollView } from './components';
 import ComponentFactory from './manager/component-factory';
 import ModuleFactory from './manager/module-factory';
+import SDKManager from './manager/sdk-manager';
 import { DomModule } from './modules';
 
 export default class RenderXEngine {}
 
 RenderXEngine.initSDKEnvironment = function (script) {
   RenderXEngine.registerDefaults();
-  // todo  从script注入context特异方法
+  SDKManager.bridgeMgr.executeJsFramework(script);
 }
 
 RenderXEngine.registerDefaults = function () {

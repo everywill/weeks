@@ -1,5 +1,15 @@
+import CoreBridge from './core-bridge';
+
 export default class BridgeContext {
-  constructor() {}
+  constructor() {
+    this.bridge = new CoreBridge();
+
+    this.registerGlobalFunctions();
+  }
+
+  executeJsFramework(script) {
+    this.bridge.executeJsFramework(script);
+  }
 
   registerGlobalFunctions() {}
 }
