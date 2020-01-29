@@ -13,9 +13,14 @@ function updateElement (el, changes) {
 }
 
 export default class Document {
-  constructor(id, ) {
+  constructor(id) {
     this.id = id;
-    this.taskCenter = new TaskCenter();
+    this.taskCenter = new TaskCenter(id);
+    this.createDocumentElement();
+  }
+
+  createDocumentElement() {
+    
   }
 
   createElement(tagName, props) {
