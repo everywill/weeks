@@ -1,6 +1,8 @@
+import ComponentFactory from './component-factory';
+
 export default class ComponentManager {
-  constructor(renderXInstance) {
-    this.componentFactory = renderXInstance.componentFactory;
+  constructor(instance) {
+    this.instance = instance;
     this.builtComponent = {};
   }
   addComponent(componentData, parentId, insertIndex) {
@@ -26,7 +28,7 @@ export default class ComponentManager {
 
   buildComponentForData(data) {
     const { type, id } = data;
-    const Clazz = this.componentFactory[type];
+    const Clazz = ComponentFactory.classWithComponentName(type);
 
     const component = new Clazz(data);
 

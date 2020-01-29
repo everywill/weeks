@@ -1,36 +1,35 @@
 import { View, Text, Image, ScrollView } from './components';
+import ComponentFactory from './manager/component-factory';
+import ModuleFactory from './manager/module-factory';
 import { DomModule } from './modules';
 
-export default class RenderXEngine {
-  constructor() {
-    this.componentFactory = {};
-  }
+export default class RenderXEngine {}
 
-  initSDKEnvironment(script) {
-    this.registerDefaults();
-    // todo  从script注入context特异方法
-  }
+RenderXEngine.initSDKEnvironment = function (script) {
+  RenderXEngine.registerDefaults();
+  // todo  从script注入context特异方法
+}
 
-  registerDefaults() {
-    this.registerDefaultComponents();
-    this.registerDefaultModules();
-  }
+RenderXEngine.registerDefaults = function () {
+  RenderXEngine.registerDefaultComponents();
+  RenderXEngine.registerDefaultModules();
+}
 
-  registerDefaultComponents() {
-    this.registerComponent('view', View);
-    this.registerComponent('text', Text);
-    this.registerComponent('image', Image);
-    this.registerComponent('scroll', ScrollView);
-  }
-  registerDefaultModules() {
-    this.registerModule('dom', DomModule);
-  }
+RenderXEngine.registerDefaultComponents = function () {
+  RenderXEngine.registerComponent('view', View);
+  RenderXEngine.registerComponent('text', Text);
+  RenderXEngine.registerComponent('image', Image);
+  RenderXEngine.registerComponent('scroll', ScrollView);
+}
 
-  registerComponent(name, clazz) {
-    this.componentFactory[name] = clazz;
-  }
+RenderXEngine.registerDefaultModules = function () {
+  RenderXEngine.registerModule('dom', DomModule);
+}
 
-  registerModule(name, clazz) {
-    
-  }
+RenderXEngine.registerComponent = function (name, clazz) {
+  ComponentFactory.registerComponent(name, clazz);
+}
+
+RenderXEngine.registerModule = function (name, clazz) {
+  ModuleFactory.registerModule(name, clazz);
 }
