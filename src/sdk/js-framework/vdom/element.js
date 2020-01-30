@@ -18,6 +18,7 @@ export default class Element {
     this.nodeId = uniqueId();
     this.attr = props.attr || {};
     this.style = props.style || {};
+    this.event = {};
     this.children = [];
   }
 
@@ -33,20 +34,6 @@ export default class Element {
       { action: 'addElement' },
       [this.nodeId, node.toJSON(), -1],
     )
-  }
-
-  insertBefore(node, before) {
-    linkParent(node, this);
-    insertIndex(node, this.children, this.children.indexOf(before), true);
-
-    registerNode(this.docId, node);
-
-    const taskCenter = getTaskCenter(this.docId);
-    return taskCenter.send(
-      'dom',
-      { action: 'addElement' },
-      [this.nodeId, node.toJSON(), index],
-    );
   }
 
   removeChild(node) {
@@ -87,6 +74,30 @@ export default class Element {
       { action: 'updateStyle' },
       [this.nodeId, result],
     );
+  }
+
+  addEventListener(type, handler) {
+    if (!this.event[type]) {
+      const taskCenter = getTaskCenter(this.docId);
+      taskCenter.send(
+        'dom',
+        { action: 'addEvent' },
+        [this.ref, type]
+      );
+    }
+    this.event[type] = handler;
+  }
+
+  removeEventListener(type, handler) {
+    if (this.event[type]) {
+      delete this.event[type];
+      const taskCenter = getTaskCenter(this.docId);
+      taskCenter.send(
+        'dom',
+        { action: 'removeEvent' },
+        [this.nodeId, type],
+      );
+    }
   }
 
   toJSON () {
