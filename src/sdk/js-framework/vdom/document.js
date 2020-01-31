@@ -13,7 +13,7 @@ export default class Document {
   }
 
   createDocumentElement() {
-    if (!this.createElement) {
+    if (!this.documentElement) {
       const el = new Element('document');
       el.docId = this.id;
       el.ownerDocument = this;

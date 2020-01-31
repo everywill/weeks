@@ -1,3 +1,13 @@
+function fallback(id, options, index) {
+  const { module, method, args } = options[0];
+  console.log('---\n');
+  console.log(`instanceId: ${id}\n`);
+  console.log(`module: ${module}, method: ${method}\n`);
+  console.log('args:\n');
+  console.log(JSON.stringify(args, null, 2));
+  console.log('\n');
+}
+
 export class TaskCenter {
   constructor(id) {
     this.instanceId = id;
@@ -35,7 +45,9 @@ export function init() {
 
   for (const name in DOM_METHODS) {
     const method = DOM_METHODS[name];
-    proto[name] = (id, args) => method(id, ...args);
+    proto[name] = method ?
+      (id, args) => method(id, ...args) :
+      (id, args) => fallback(id, [{ module: 'dom', method: name, args }], '-1');
   }
 
   proto.componentHandler = global.callNativeComponent;

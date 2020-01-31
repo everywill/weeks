@@ -8,7 +8,8 @@ code = `
   span.setAttr('value', 'text node')
   div.appendChild(span)
   body.appendChild(div)
-  console.log(JSON.stringify(body, null, 2))
+  document.documentElement.appendChild(body)
+  // console.log(JSON.stringify(body, null, 2))
 `;
 
 xRender.createInstance(Date.now(), code);

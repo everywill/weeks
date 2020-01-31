@@ -38,6 +38,19 @@ export function appendBody (doc, node) {
   }
 }
 
+function sendBody (doc, node) {
+  const body = node.toJSON();
+  const children = body.children;
+  delete body.children;
+  let result = doc.taskCenter.send('dom', { action: 'createBody' }, [body]);
+  if (children) {
+    children.forEach(child => {
+      result = doc.taskCenter.send('dom', { action: 'addElement' }, [body.id, child, -1]);
+    });
+  }
+  return result;
+}
+
 export function setBody (doc, el) {
   el.depth = 1;
   delete doc.nodeMap[el.nodeId];
