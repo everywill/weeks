@@ -12,7 +12,7 @@ function registerNode (docId, node) {
 }
 
 export default class Element {
-  constructor(type, props) {
+  constructor(type, props = {}) {
     this.type = type;
     this.nodeType = 1;
     this.nodeId = uniqueId();
@@ -51,14 +51,16 @@ export default class Element {
       return;
     }
     this.attr[key] = value;
-    const taskCenter = getTaskCenter(this.docId);
-    const result = {};
-    result[key] = value;
-    taskCenter.send(
-      'dom',
-      { action: 'updateAttrs' },
-      [this.ref, result],
-    );
+    const taskCenter = getTaskCenter(this.docId)
+    if (taskCenter) {
+      const result = {};
+      result[key] = value;
+      taskCenter.send(
+        'dom',
+        { action: 'updateAttrs' },
+        [this.ref, result],
+      );
+    }
   }
 
   setStyle (key, value) {
@@ -67,36 +69,42 @@ export default class Element {
     }
     this.style[key] = value;
     const taskCenter = getTaskCenter(this.docId);
-    const result = {};
-    result[key] = value;
-    taskCenter.send(
-      'dom',
-      { action: 'updateStyle' },
-      [this.nodeId, result],
-    );
+    if (taskCenter) {
+      const result = {};
+      result[key] = value;
+      taskCenter.send(
+        'dom',
+        { action: 'updateStyle' },
+        [this.ref, result],
+      );
+    }
   }
 
   addEventListener(type, handler) {
     if (!this.event[type]) {
       const taskCenter = getTaskCenter(this.docId);
-      taskCenter.send(
-        'dom',
-        { action: 'addEvent' },
-        [this.ref, type]
-      );
+      if (taskCenter) {
+        taskCenter.send(
+          'dom',
+          { action: 'addEvent' },
+          [this.ref, type],
+        );
+      }
     }
     this.event[type] = handler;
   }
 
-  removeEventListener(type, handler) {
+  removeEventListener(type) {
     if (this.event[type]) {
       delete this.event[type];
       const taskCenter = getTaskCenter(this.docId);
-      taskCenter.send(
-        'dom',
-        { action: 'removeEvent' },
-        [this.nodeId, type],
-      );
+      if (taskCenter) {
+        taskCenter.send(
+          'dom',
+          { action: 'removeEvent' },
+          [this.ref, type],
+        );
+      }
     }
   }
 

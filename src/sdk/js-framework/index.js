@@ -1,7 +1,7 @@
 import config from './config';
 import init from './init';
 
-export default {
+export {
   config,
   init,
 }

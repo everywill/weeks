@@ -1,28 +1,7 @@
-const config = {};
-const instanceMap = {};
+import framework from './framework';
+import { init, config } from '../../sdk/js-framework/index';
 
-export function init (cfg) {
-  config.Document = cfg.Document;
-  config.Element = cfg.Element;
-}
+config.framework = framework;
+init(config);
 
-export function createInstance(id, code) {
-  const document = new config.Document(id);
-
-  instanceMap[id] = document;
-
-  const globalObjects = {
-    document,
-  };
-  const globalKeys = [];
-  const globalValues = [];
-
-  for (const key in globalObjects) {
-    globalKeys.push(key);
-    globalValues.push(globalObjects[key]);
-  }
-  globalKeys.push(code);
-
-  const result = new Function(...globalKeys);
-  return result(...globalValues);
-}
+export default framework;
