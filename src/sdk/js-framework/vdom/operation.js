@@ -19,7 +19,7 @@ export function getTaskCenter (id) {
 
 let nextNodeRef = 0;
 export function uniqueId () {
-  return (nextNodeRef++).toString()
+  return (nextNodeRef++).toString();
 };
 
 export function appendBody (doc, node) {

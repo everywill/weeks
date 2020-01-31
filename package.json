@@ -10,8 +10,9 @@
     "tslint-config-airbnb": "^5.11.2"
   },
   "scripts": {
-    "debug": "node --inspect-brk ./__test__/context/html/index.js --verbose",
-    "build:js-framework": "rollup ./src/context/html/index.js -f umd -n x-render -o dist/x-render.umd.js"
+    "debug": "node --inspect-brk ./__test__/scripts/index.js --verbose",
+    "build:js-framework": "rollup ./src/scripts/index.js -f umd -n js-framework -o dist/js-framework.umd.js",
+    "build:sdk": "rollup ./src/sdk/index.js -f umd -n x-render -o dist/x-render.umd.js"
   },
   "license": "MIT",
   "author": "everywill <everywillatchina@gmail.com>"

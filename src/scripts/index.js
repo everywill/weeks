@@ -1,5 +1,5 @@
 import framework from './framework';
-import { init, config } from '../../sdk/js-framework/index';
+import { init, config } from '../sdk/js-framework/index';
 
 config.framework = framework;
 init(config);
