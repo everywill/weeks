@@ -10,7 +10,7 @@
     "tslint-config-airbnb": "^5.11.2"
   },
   "scripts": {
-    "debug": "node --inspect-brk ./__test__/non-flex --verbose",
+    "debug": "node --inspect-brk ./__test__/context/html/index.js --verbose",
     "build:js-framework": "rollup ./src/context/html/index.js -f umd -n x-render -o dist/x-render.umd.js"
   },
   "license": "MIT",

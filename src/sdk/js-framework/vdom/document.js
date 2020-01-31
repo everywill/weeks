@@ -1,5 +1,5 @@
 import { TaskCenter } from '../task-center';
-import { addDoc, setBody } from './operation';
+import { addDoc, setBody, appendBody } from './operation';
 import Element from './element';
 
 export default class Document {

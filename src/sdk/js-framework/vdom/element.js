@@ -26,14 +26,18 @@ export default class Element {
     linkParent(node, this);
     insertIndex(node, this.children, this.children.length, true);
 
-    registerNode(this.docId, node);
+    if (this.docId) {
+      registerNode(this.docId, node)
+    }
 
     const taskCenter = getTaskCenter(this.docId)
-    return taskCenter.send(
-      'dom',
-      { action: 'addElement' },
-      [this.nodeId, node.toJSON(), -1],
-    )
+    if (taskCenter) {
+      return taskCenter.send(
+        'dom',
+        { action: 'addElement' },
+        [this.nodeId, node.toJSON(), -1],
+      );
+    }
   }
 
   removeChild(node) {
@@ -58,7 +62,7 @@ export default class Element {
       taskCenter.send(
         'dom',
         { action: 'updateAttrs' },
-        [this.ref, result],
+        [this.nodeId, result],
       );
     }
   }
@@ -75,7 +79,7 @@ export default class Element {
       taskCenter.send(
         'dom',
         { action: 'updateStyle' },
-        [this.ref, result],
+        [this.nodeId, result],
       );
     }
   }
@@ -87,7 +91,7 @@ export default class Element {
         taskCenter.send(
           'dom',
           { action: 'addEvent' },
-          [this.ref, type],
+          [this.nodeId, type],
         );
       }
     }
@@ -102,7 +106,7 @@ export default class Element {
         taskCenter.send(
           'dom',
           { action: 'removeEvent' },
-          [this.ref, type],
+          [this.nodeId, type],
         );
       }
     }
@@ -114,11 +118,15 @@ export default class Element {
       type: this.type,
       attr: this.attr,
       style: this.style,
-    }
+    };
     const event = Object.keys(this.event);
 
     if (event.length) {
       result.event = event;
+    }
+
+    if (this.children.length) {
+      result.children = this.children.map((child) => child.toJSON());
     }
   
     return result;
