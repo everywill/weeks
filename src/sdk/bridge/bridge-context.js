@@ -7,8 +7,8 @@ export default class BridgeContext {
     this.registerGlobalFunctions();
   }
 
-  executeJsFramework(script) {
-    this.bridge.executeJsFramework(script);
+  executeJsFramework(filePath) {
+    this.bridge.executeJsFramework(filePath);
   }
 
   registerGlobalFunctions() {}

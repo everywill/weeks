@@ -1,9 +1,13 @@
+const { Worker } = require('worker_threads');
+
 export default class CoreBridge {
   constructor() {}
 
-  executeJsFramework(script) {}
+  executeJsFramework(filePath) {
+    const worker = new Worker(filePath);
+  }
 
   callWorkerMethod(method, args) {
-    
+
   }
 }

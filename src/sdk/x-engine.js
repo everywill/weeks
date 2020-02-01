@@ -6,9 +6,9 @@ import { DomModule } from './modules/index';
 
 export default class RenderXEngine {}
 
-RenderXEngine.initSDKEnvironment = function (script) {
+RenderXEngine.initSDKEnvironment = function (filePath) {
   RenderXEngine.registerDefaults();
-  SDKManager.bridgeMgr.executeJsFramework(script);
+  SDKManager.bridgeMgr.executeJsFramework(filePath);
 }
 
 RenderXEngine.registerDefaults = function () {
