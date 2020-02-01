@@ -1,4 +1,5 @@
-const Emitter = require('../utils/event-emitter');
+import Emitter from '../utils/event-emitter';
+
 const EE = new Emitter();
 
 let uuid = 0;

@@ -1,13 +1,15 @@
+import axios from 'axios';
 import SDKManager from './manager/sdk-manager';
 import ComponentManager from './manager/component-manager';
+
 let uuid = 0
 
 export default class renderXInstance {
   constructor() {
-    const instanceId = uuid ++;
+    this.instanceId = uuid ++;
     this.componentManager = new ComponentManager(this);
     this.moduleInstances = {};
-    SDKManager.storeInstance(this, instanceId);
+    SDKManager.storeInstance(this, this.instanceId);
   }
 
   moduleForClass(ModuleClass) {
@@ -18,5 +20,11 @@ export default class renderXInstance {
     }
 
     return moduleInstace;
+  }
+
+  renderWithURL(bundleUrl) {}
+
+  renderWithBundleString(jsBundleString) {
+    SDKManager.bridgeMgr.createInstance(this.instanceId, jsBundleString);
   }
 }

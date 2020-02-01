@@ -12,4 +12,13 @@ export default class BridgeContext {
   }
 
   registerGlobalFunctions() {}
+
+  createInstance(instanceId, jsBundleString) {
+    const args = [instanceId, jsBundleString];
+    this.callWorkerMethod('createInstance', args);
+  }
+
+  callWorkerMethod(method, args) {
+    this.bridge.callWorkerMethod(method, args);
+  }
 }
