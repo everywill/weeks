@@ -1,4 +1,4 @@
-const xRender = require('../../../dist/x-render.umd');
+const xRender = require('../../../dist/js-framework.umd');
 
 code = `
   var body = document.createBody()

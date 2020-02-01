@@ -1,8 +1,8 @@
-import { View, Text, Image, ScrollView } from './components';
+import { View, Text, Image, ScrollView } from './components/index';
 import ComponentFactory from './manager/component-factory';
 import ModuleFactory from './manager/module-factory';
 import SDKManager from './manager/sdk-manager';
-import { DomModule } from './modules';
+import { DomModule } from './modules/index';
 
 export default class RenderXEngine {}
 
