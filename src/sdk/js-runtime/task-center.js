@@ -1,11 +1,12 @@
 function fallback(id, options, index) {
-  const { module, method, args } = options[0];
-  console.log('---\n');
-  console.log(`instanceId: ${id}\n`);
-  console.log(`module: ${module}, method: ${method}\n`);
-  console.log('args:\n');
-  console.log(JSON.stringify(args, null, 2));
-  console.log('\n');
+  // const { module, method, args } = options[0];
+  // console.log('---\n');
+  // console.log(`instanceId: ${id}\n`);
+  // console.log(`module: ${module}, method: ${method}\n`);
+  // console.log('args:\n');
+  // console.log(JSON.stringify(args, null, 2));
+  // console.log('\n');
+  global.callNative(id, options, index);
 }
 
 export class TaskCenter {

@@ -3,15 +3,17 @@ import CoreBridge from './core-bridge';
 export default class BridgeContext {
   constructor() {
     this.bridge = new CoreBridge();
-
-    this.registerGlobalFunctions();
   }
 
   executeJsFramework(filePath) {
     this.bridge.executeJsFramework(filePath);
+    this.registerGlobalFunctions();
   }
 
-  registerGlobalFunctions() {}
+  registerGlobalFunctions() {
+    this.bridge.registerCallParent();
+    this.bridge.registerCallAddElement();
+  }
 
   createInstance(instanceId, jsBundleString) {
     const args = [instanceId, jsBundleString];

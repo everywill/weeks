@@ -5,9 +5,18 @@ export default class CoreBridge {
 
   executeJsFramework(filePath) {
     const worker = new Worker(filePath);
+    this.jsContext = worker;
+  }
+
+  registerCallParent(callParent) {
+    this.callWorkerMethod('registerMethod', {callParent});
+  }
+
+  registerCallAddElement(callAddElement) {
+    this.callWorkerMethod('registerMethod', {callAddElement});
   }
 
   callWorkerMethod(method, args) {
-
+    this.worker.postMessage({cmd: 'invokeMethod', data: { name: method, args}});
   }
 }
