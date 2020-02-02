@@ -12,7 +12,7 @@
   },
   "scripts": {
     "debug": "node --inspect-brk ./__test__/scripts/index.js --verbose",
-    "build:js-framework": "rollup ./src/scripts/index.js -f umd -n js-framework -o dist/js-framework.umd.js",
+    "build:js-framework": "rollup ./src/js-framework/index.js -f umd -n js-framework -o dist/js-framework.umd.js",
     "build:sdk": "rollup ./src/sdk/index.js -f umd -n x-render -o dist/x-render.umd.js"
   },
   "license": "MIT",

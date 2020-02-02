@@ -1,5 +1,5 @@
-import framework from './framework';
-import { init, config } from '../sdk/js-runtime/index';
+import framework from './frameworks/vanilla';
+import { init, config } from './runtime/index';
 
 global = global || globalThis;
 
