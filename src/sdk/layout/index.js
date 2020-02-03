@@ -978,3 +978,22 @@ module.exports = function (node) {
   fillNodes(node);
   layoutNode(node);
 }
+
+class CSSNode {
+  constructor() {
+    this.style = {};
+    this.layout = {};
+    this.lineIndex = undefined;
+
+    this.childCount = undefined;
+    this.nextAbsoluteChild = undefined;
+    this.nextFlexChild = undefined;
+
+    this.measure = undefined;
+    this.getChild = undefined;
+    this.isDirty = undefined;
+    this.context = undefined;
+  }
+}
+
+export function newCSSNode() {}
