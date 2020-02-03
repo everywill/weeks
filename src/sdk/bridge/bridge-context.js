@@ -13,8 +13,8 @@ export default class BridgeContext {
   }
 
   registerGlobalFunctions() {
-    this.bridge.registerCallNative(this.invokeNative);
-    this.bridge.registerCallAddElement();
+    this.bridge.registerCallNative(this.invokeNative.bind(this));
+    this.bridge.registerCallAddElement(this.invokeAddElement.bind(this));
   }
 
   createInstance(instanceId, jsBundleString) {
@@ -30,6 +30,13 @@ export default class BridgeContext {
       const moduleMethod = new ModuleMethod({moduleName, methodName, args, instance});
       moduleMethod.invoke();
     }
+  }
+
+  invokeAddElement(instanceId, parentId, componentData, insertIndex) {
+    const instance = SDKManager.instanceForId(instanceId);
+    const manager = instance.componentManager;
+    
+    manager.addComponent(componentData, parentId, insertIndex);
   }
 
   callWorkerMethod(method, args) {

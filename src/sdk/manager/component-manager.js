@@ -3,8 +3,19 @@ import ComponentFactory from './component-factory';
 export default class ComponentManager {
   constructor(instance) {
     this.instance = instance;
+    this.rootComponent = null;
     this.builtComponent = {};
   }
+
+  createRoot(data) {
+    this.rootComponent = this.buildComponentForData(data);
+    this.initRootCSSNode();
+  }
+
+  initRootCSSNode() {
+
+  }
+
   addComponent(componentData, parentId, insertIndex) {
     const parentComponent = this.builtComponent[parentId];
 
@@ -17,7 +28,7 @@ export default class ComponentManager {
 
     parentComponent.insertChildComponent(component, index);
 
-    const childComponentsData = componentData.children;
+    const childComponentsData = componentData.children || [];
 
     // todo: relayout
 
@@ -27,6 +38,9 @@ export default class ComponentManager {
   }
 
   buildComponentForData(data) {
+    // console.log('buildComponentForData received:');
+    // console.log(data);
+    // console.log('---');
     const { type, id } = data;
     const Clazz = ComponentFactory.classWithComponentName(type);
 

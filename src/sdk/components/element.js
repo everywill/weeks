@@ -2,24 +2,23 @@ import Emitter from '../utils/event-emitter';
 
 const EE = new Emitter();
 
-let uuid = 0;
 const elementEvents = ['click', 'touchstart', 'touchmove', 'touchend', 'touchcancel'];
 
 const toEventName = (event, id) => {
-  if (elementEvent.indexOf(event) !== -1) {
+  if (elementEvents.indexOf(event) !== -1) {
     return `element-${id}-${event}`;
   }
 }
 
 export default class Element {
   constructor({
-    id = ++uuid,
+    id,
     style = {},
   }) {
     this.id = id;
     this.style = style;
     this.cssNode = {};
-    this.children = {};
+    this.childComponents = [];
     this.parentNode = null;
 
     elementEvents.forEach((eventName) => {

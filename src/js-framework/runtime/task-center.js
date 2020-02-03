@@ -30,25 +30,27 @@ export class TaskCenter {
 
 export function init() {
   const DOM_METHODS = {
-    createBody: global.callCreateBody,
+    createBody: 'callCreateBody',
 
-    addElement: global.callAddElement,
-    removeElement: global.callRemoveElement,
-    moveElement: global.callMoveElement,
-    updateAttrs: global.callUpdateAttrs,
-    updateStyle: global.callUpdateStyle,
+    addElement: 'callAddElement',
+    removeElement: 'callRemoveElement',
+    moveElement: 'callMoveElement',
+    updateAttrs: 'callUpdateAttrs',
+    updateStyle: 'callUpdateStyle',
 
-    addEvent: global.callAddEvent,
-    removeEvent: global.callRemoveEvent,
+    addEvent: 'callAddEvent',
+    removeEvent: 'callRemoveEvent',
   };
 
   const proto = TaskCenter.prototype;
 
   for (const name in DOM_METHODS) {
-    const method = DOM_METHODS[name];
-    proto[name] = method ?
-      (id, args) => method(id, ...args) :
-      (id, args) => fallback(id, [{ module: 'dom', method: name, args }]);
+    
+    proto[name] = (id, args) => {
+      const method = global[DOM_METHODS[name]];
+      
+      method ? method(id, ...args) : fallback(id, [{ module: 'dom', method: name, args }]);
+    };
   }
 
   proto.componentHandler = global.callNativeComponent;

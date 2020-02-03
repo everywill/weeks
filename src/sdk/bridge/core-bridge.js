@@ -21,11 +21,13 @@ export default class CoreBridge {
     this.callWorkerMethod('registerMethod', [
       'callNative', 
       ['instanceId', 'taskArray', `
-        // console.log(global)
         global.parentPort.postMessage({cmd: 'callNative', data: {instanceId, taskArray}});
       `],
     ]);
     this.callNative = function(data) {
+      console.log('data received in callNative:');
+      console.log(JSON.stringify(data, null, 2));
+      console.log('---');
       const { instanceId, taskArray } = data;
       callNative(instanceId, taskArray);
     }
@@ -34,8 +36,17 @@ export default class CoreBridge {
   registerCallAddElement(callAddElement) {
     this.callWorkerMethod('registerMethod', [
       'callAddElement',
-      []
+      ['instanceId', 'parentId', 'componentData', 'insertIndex', `
+        global.parentPort.postMessage({cmd: 'callAddElement', data: {instanceId, parentId, componentData, insertIndex}});
+      `]
     ]);
+    this.callAddElement = function(data) {
+      console.log('data received in callAddElement:');
+      console.log(data);
+      console.log('---');
+      const { instanceId, parentId, componentData, insertIndex } = data;
+      callAddElement(instanceId, parentId, componentData, insertIndex);
+    }
   }
 
   callWorkerMethod(method, args) {
