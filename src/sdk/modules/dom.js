@@ -10,6 +10,8 @@ export default class DomModule {
     this.manager.removeComponent(componentId);
   }
 
-  addEvent() {}
+  addEvent(msg) {
+    console.log(`dom-module receives addEvent: ${msg}`);
+  }
   removeEvent() {}
 } 

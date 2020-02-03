@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { xEngine, xInstance } = require('../../dist/x-render.umd');
 
-const frameworkBundle = path.join(__dirname + '../../dist/js-framework.umd');
+const frameworkBundle = path.join(__dirname + '../../../dist/js-framework.umd.js');
 
 xEngine.initSDKEnvironment(frameworkBundle);
 

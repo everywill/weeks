@@ -16,5 +16,6 @@ export default class ModuleMethod {
   invoke() {
     const ModuleClass = ModuleFactory.classWithModuleName(this.moduleName);
     const moduleInstance = this.instance.moduleForClass(ModuleClass);
+    moduleInstance[this.methodName](...this.args);
   }
 }

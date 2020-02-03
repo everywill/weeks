@@ -1,4 +1,3 @@
-import axios from 'axios';
 import SDKManager from './manager/sdk-manager';
 import ComponentManager from './manager/component-manager';
 

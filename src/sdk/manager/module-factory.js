@@ -1,4 +1,4 @@
-const moduleMap = {}
+const moduleMap = {};
 
 export default class ModuleFactory {
   constructor() {}

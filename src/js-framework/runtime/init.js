@@ -17,7 +17,7 @@ function createInstance(id, code) {
 
 function registerMethod(methodName, method) {
   global = global || globalThis;
-  global[methodName] = method;
+  global[methodName] = new Function(...method);
 }
 
 const methods = {
