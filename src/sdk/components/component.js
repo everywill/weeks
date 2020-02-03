@@ -2,15 +2,15 @@ import Emitter from '../utils/event-emitter';
 
 const EE = new Emitter();
 
-const elementEvents = ['click', 'touchstart', 'touchmove', 'touchend', 'touchcancel'];
+const componentEvents = ['click', 'touchstart', 'touchmove', 'touchend', 'touchcancel'];
 
 const toEventName = (event, id) => {
-  if (elementEvents.indexOf(event) !== -1) {
-    return `element-${id}-${event}`;
+  if (componentEvents.indexOf(event) !== -1) {
+    return `component-${id}-${event}`;
   }
 }
 
-export default class Element {
+export default class Component {
   constructor({
     id,
     style = {},
@@ -19,17 +19,18 @@ export default class Element {
     this.style = style;
     this.cssNode = {};
     this.childComponents = [];
-    this.parentNode = null;
+    this.parentComponent = null;
 
-    elementEvents.forEach((eventName) => {
+    componentEvents.forEach((eventName) => {
       this.addEvent(eventName, (e, msg) => {
-        this.parent && this.parent.fireEvent(eventName, e, msg);
+        this.parentComponent && this.parentComponent.fireEvent(eventName, e, msg);
       })
     });
   }
 
-  insertChildComponent(childNode) {
-    
+  insertChildComponent(childComponent, index) {
+    childComponent.parentComponent = this;
+    this.childComponents[index] = childComponent;
   }
 
   removeFromParentComponent() {

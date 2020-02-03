@@ -4,6 +4,7 @@ export default class ComponentManager {
   constructor(instance) {
     this.instance = instance;
     this.rootComponent = null;
+    this.rootCSSNode = null;
     this.builtComponent = {};
   }
 

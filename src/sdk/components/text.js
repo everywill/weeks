@@ -1,9 +1,7 @@
+import Component from './component';
 
-import Element from './element';
-
-export default class Text extends Element {
+export default class Text extends Component {
   constructor(data) {
     super(data);
-    console.log('Text created')
   }
 }

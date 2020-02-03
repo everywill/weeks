@@ -1,6 +1,6 @@
-import Element from './element';
+import Component from './component';
 
-export default class ScrollView extends Element {
+export default class ScrollView extends Component {
   constructor(data) {
     super(data);
   }

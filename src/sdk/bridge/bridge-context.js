@@ -35,8 +35,10 @@ export default class BridgeContext {
   invokeAddElement(instanceId, parentId, componentData, insertIndex) {
     const instance = SDKManager.instanceForId(instanceId);
     const manager = instance.componentManager;
-    
+
     manager.addComponent(componentData, parentId, insertIndex);
+
+    console.log(manager.rootComponent);
   }
 
   callWorkerMethod(method, args) {
