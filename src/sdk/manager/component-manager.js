@@ -1,5 +1,5 @@
 import ComponentFactory from './component-factory';
-import { newCSSNode } from '../layout/index';
+import { newCSSNode, layoutNode } from '../layout/index';
 
 export default class ComponentManager {
   constructor(instance) {
@@ -19,6 +19,16 @@ export default class ComponentManager {
     this.applyRootFrame(this.instance.frame, this.rootCSSNode);
 
     this.rootCSSNode.context = this;
+    this.rootCSSNode.childCount = 1;
+    this.rootCSSNode.getChild = this.rootNodeGetChild;
+    this.layout();
+  }
+
+  rootNodeGetChild(context, index) {
+    if (index === 0) {
+      return context.rootComponent.cssNode;
+    }
+    return null;
   }
 
   applyRootFrame(rootFrame, rootCSSNode) {
@@ -30,7 +40,10 @@ export default class ComponentManager {
   }
 
   layout() {
-    
+    layoutNode(this.rootCSSNode, this.rootCSSNode.style.width);
+    console.log('layout result:');
+    console.log(JSON.stringify(this.rootCSSNode, null, 2));
+    console.log('---');
   }
 
   addComponent(componentData, parentId, insertIndex) {

@@ -1,4 +1,5 @@
 import Emitter from '../utils/event-emitter';
+import { newCSSNode } from '../layout/index';
 
 const EE = new Emitter();
 
@@ -21,11 +22,39 @@ export default class Component {
     this.childComponents = [];
     this.parentComponent = null;
 
+    this.initCSSNodeWithStyle(style);
+
     componentEvents.forEach((eventName) => {
       this.addEvent(eventName, (e, msg) => {
         this.parentComponent && this.parentComponent.fireEvent(eventName, e, msg);
       })
     });
+  }
+
+  initCSSNodeWithStyle(style) {
+    this.cssNode = newCSSNode();
+    this.cssNode.context = this;
+    this.cssNode.getChild = this.cssNodeGetChild;
+
+    this.fillCSSNode(style);
+  }
+
+  fillCSSNode(style) {
+    this.cssNode.style = Object.assign({}, style);
+  }
+
+  cssNodeGetChild(context, index) {
+    const childComponents = context.childComponents;
+    for (let i = 0; i <= index && i < childComponents.length; i++) {
+      const child = childComponents[i];
+      if (!child.isNeedJoinLayoutSystem) {
+        index ++;
+      }
+    }
+
+    if (index > 0 && index < childComponents.length) {
+      return childComponents[index];
+    }
   }
 
   insertChildComponent(childComponent, index) {

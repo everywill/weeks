@@ -907,7 +907,7 @@ function layoutNodeImpl(node, parentMaxWidth, parentDirection) {
   }
 }
 
-function layoutNode(node, parentMaxWidth, parentDirection) {
+export function layoutNode(node, parentMaxWidth, parentDirection) {
   node.shouldUpdate = true;
 
   const direction = node.style.direction || CSS_DIRECTION_LTR;
@@ -935,9 +935,12 @@ function layoutNode(node, parentMaxWidth, parentDirection) {
     node.lastLayout.direction = direction;
 
     // Reset child layouts
+    for (let i = 0, length = node.childCount; i < length; i++) {
+      resetNodeLayout(node.getChild(node.context, i));
+    }
     node.children.forEach(function(child) {
-      child.layout.width = undefined;
-      child.layout.height = undefined;
+      child.layout.width = CSS_UNDEFINED;
+      child.layout.height = CSS_UNDEFINED;
       child.layout.top = 0;
       child.layout.left = 0;
     });
@@ -951,10 +954,12 @@ function layoutNode(node, parentMaxWidth, parentDirection) {
   }
 }
 
-// module.exports = function (node) {
-//   fillNodes(node);
-//   layoutNode(node);
-// }
+function resetNodeLayout(node) {
+  node.layout.width = CSS_UNDEFINED;
+  node.layout.height = CSS_UNDEFINED;
+  node.layout.left = 0;
+  node.layout.top = 0;
+}
 
 // function fillNodes(node) {
 //   if (!node.layout || node.isDirty) {
