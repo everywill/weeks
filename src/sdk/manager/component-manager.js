@@ -1,4 +1,5 @@
 import ComponentFactory from './component-factory';
+import { newCSSNode } from '../layout/index';
 
 export default class ComponentManager {
   constructor(instance) {
@@ -14,7 +15,22 @@ export default class ComponentManager {
   }
 
   initRootCSSNode() {
+    this.rootCSSNode = newCSSNode();
+    this.applyRootFrame(this.instance.frame, this.rootCSSNode);
 
+    this.rootCSSNode.context = this;
+  }
+
+  applyRootFrame(rootFrame, rootCSSNode) {
+    rootCSSNode.style.left = rootFrame.origin.x;
+    rootCSSNode.style.top = rootFrame.origin.y;
+
+    rootCSSNode.style.width = rootFrame.size.width;
+    rootCSSNode.style.height = rootFrame.size.height;
+  }
+
+  layout() {
+    
   }
 
   addComponent(componentData, parentId, insertIndex) {

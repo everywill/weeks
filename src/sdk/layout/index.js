@@ -369,29 +369,6 @@ function isMeasureDefined(node) {
   return node.measure !== undefined;
 }
 
-function fillNodes(node) {
-  if (!node.layout || node.isDirty) {
-    node.layout = {
-      width: undefined,
-      height: undefined,
-      top: 0,
-      left: 0,
-      right: undefined,
-      bottom: undefined
-    };
-  }
-
-  if (!node.style) {
-    node.style = {};
-  }
-
-  if (!node.children) {
-    node.children = [];
-  }
-  node.children.forEach(fillNodes);
-  return node;
-}
-
 function layoutNodeImpl(node, parentMaxWidth, parentDirection) {
   const direction = resolveDirection(node, parentDirection);
   const mainAxis = resolveAxis(getFlexDirection(node), direction);
@@ -974,9 +951,57 @@ function layoutNode(node, parentMaxWidth, parentDirection) {
   }
 }
 
-module.exports = function (node) {
-  fillNodes(node);
-  layoutNode(node);
+// module.exports = function (node) {
+//   fillNodes(node);
+//   layoutNode(node);
+// }
+
+// function fillNodes(node) {
+//   if (!node.layout || node.isDirty) {
+//     node.layout = {
+//       width: undefined,
+//       height: undefined,
+//       top: 0,
+//       left: 0,
+//       right: undefined,
+//       bottom: undefined
+//     };
+//   }
+
+//   if (!node.style) {
+//     node.style = {};
+//   }
+
+//   if (!node.children) {
+//     node.children = [];
+//   }
+//   node.children.forEach(fillNodes);
+//   return node;
+// }
+
+function initCSSNode(node) {
+  node.style.alignItem = CSS_ALIGN_STRETCH;
+  node.style.alignItems = CSS_ALIGN_FLEX_START;
+  
+  node.style.direction = CSS_DIRECTION_INHERIT;
+  node.style.flexDirection = CSS_FLEX_DIRECTION_COLUMN;
+
+  node.style.width = CSS_UNDEFINED;
+  node.style.height = CSS_UNDEFINED;
+
+  node.style.minWidth = CSS_UNDEFINED;
+  node.style.minHeight = CSS_UNDEFINED;
+
+  node.style.maxWidth = CSS_UNDEFINED;
+  node.style.maxHeight = CSS_UNDEFINED;
+
+  node.style.left = CSS_UNDEFINED;
+  node.style.top = CSS_UNDEFINED;
+  node.style.right = CSS_UNDEFINED;
+  node.style.bottom = CSS_UNDEFINED;
+
+  node.layout.width = CSS_UNDEFINED;
+  node.layout.height = CSS_UNDEFINED;
 }
 
 class CSSNode {
@@ -985,9 +1010,9 @@ class CSSNode {
     this.layout = {};
     this.lineIndex = undefined;
 
-    this.childCount = undefined;
-    this.nextAbsoluteChild = undefined;
-    this.nextFlexChild = undefined;
+    this.childCount = 0;
+    this.nextAbsoluteChild = null;
+    this.nextFlexChild = null;
 
     this.measure = undefined;
     this.getChild = undefined;
@@ -996,4 +1021,8 @@ class CSSNode {
   }
 }
 
-export function newCSSNode() {}
+export function newCSSNode() {
+  const cssNode = new CSSNode();
+  initCSSNode(cssNode);
+  return cssNode;
+}
