@@ -22,8 +22,10 @@ export default class Component {
     this.childComponents = [];
     this.parentComponent = null;
 
-    this.initCSSNodeWithStyle(style);
+    this.isNeedJoinLayoutSystem = true;
 
+    this.initCSSNodeWithStyle(style);
+    
     componentEvents.forEach((eventName) => {
       this.addEvent(eventName, (e, msg) => {
         this.parentComponent && this.parentComponent.fireEvent(eventName, e, msg);
@@ -36,7 +38,12 @@ export default class Component {
     this.cssNode.context = this;
     this.cssNode.getChild = this.cssNodeGetChild;
 
+    this.recomputeCSSNodeChildren();
     this.fillCSSNode(style);
+  }
+
+  recomputeCSSNodeChildren() {
+    
   }
 
   fillCSSNode(style) {

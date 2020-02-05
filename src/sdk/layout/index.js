@@ -391,7 +391,7 @@ function layoutNodeImpl(node, parentMaxWidth, parentDirection) {
   node.layout[trailing[crossAxis]] += getTrailingMargin(node, crossAxis) +
     getRelativePosition(node, crossAxis);
 
-  const childCount = node.children.length;
+  const childCount = node.childCount;
   const paddingAndBorderAxisResolvedRow = getPaddingAndBorderAxis(node, resolvedRowAxis);
 
   if (isMeasureDefined(node)) {
@@ -488,7 +488,7 @@ function layoutNodeImpl(node, parentMaxWidth, parentDirection) {
 
     let maxWidth;
     for (i = startLine; i < childCount; i++) {
-      child = node.children[i];
+      child = node.getChild(i);
       child.lineIndex = linesCount;
 
       child.nextAbsoluteChild = null;
@@ -705,7 +705,7 @@ function layoutNodeImpl(node, parentMaxWidth, parentDirection) {
     mainDim += leadingMainDim;
 
     for (i = firstComplexMain; i < endLine; i++) {
-      child = node.children[i];
+      child = node.getChild(node.context, i);
 
       if (getPositionType(child) === CSS_POSITION_ABSOLUTE &&
           isPosDefined(child, leading[mainAxis])) {
@@ -738,7 +738,7 @@ function layoutNodeImpl(node, parentMaxWidth, parentDirection) {
     }
 
     for (i = firstComplexCross; i < endLine; i++) {
-      child = node.children[i];
+      child = node.getChild(node.context, i);
 
       if (getPositionType(child) === CSS_POSITION_ABSOLUTE &&
           isPosDefined(child, leading[crossAxis])) {
@@ -817,7 +817,7 @@ function layoutNodeImpl(node, parentMaxWidth, parentDirection) {
 
       let lineHeight = 0;
       for (ii = startIndex; ii < childCount; ii++) {
-        child = node.children[ii];
+        child = node.getChild(node.context, ii);
         if (getPositionType(child) !== CSS_POSITION_RELATIVE) {
           continue;
         }
@@ -835,7 +835,7 @@ function layoutNodeImpl(node, parentMaxWidth, parentDirection) {
       lineHeight += crossDimLead;
 
       for (ii = startIndex; ii < endIndex; ++ii) {
-        child = node.children[ii];
+        child = node.getChild(node.context, ii);
         if (getPositionType(child) !== CSS_POSITION_RELATIVE) {
           continue;
         }
@@ -938,12 +938,6 @@ export function layoutNode(node, parentMaxWidth, parentDirection) {
     for (let i = 0, length = node.childCount; i < length; i++) {
       resetNodeLayout(node.getChild(node.context, i));
     }
-    node.children.forEach(function(child) {
-      child.layout.width = CSS_UNDEFINED;
-      child.layout.height = CSS_UNDEFINED;
-      child.layout.top = 0;
-      child.layout.left = 0;
-    });
 
     layoutNodeImpl(node, parentMaxWidth, parentDirection);
 
