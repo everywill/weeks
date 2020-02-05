@@ -382,6 +382,14 @@ function layoutNodeImpl(node, parentMaxWidth, parentDirection) {
   // Set the resolved resolution in the node's layout
   node.layout.direction = direction;
 
+  console.log('style');
+  console.log(node.style);
+  console.log('---')
+
+  console.log('initial layout');
+  console.log(node.layout);
+  console.log('---')
+
   node.layout[leading[mainAxis]] += getLeadingMargin(node, mainAxis) +
     getRelativePosition(node, mainAxis);
   node.layout[trailing[mainAxis]] += getTrailingMargin(node, mainAxis) +
@@ -488,7 +496,7 @@ function layoutNodeImpl(node, parentMaxWidth, parentDirection) {
 
     let maxWidth;
     for (i = startLine; i < childCount; i++) {
-      child = node.getChild(i);
+      child = node.getChild(node.context, i);
       child.lineIndex = linesCount;
 
       child.nextAbsoluteChild = null;
@@ -537,6 +545,8 @@ function layoutNodeImpl(node, parentMaxWidth, parentDirection) {
           }
         }
       }
+
+      let nextContentDim = 0;
 
       if (isMainDimDefined && isFlex(child)) {
         // Even if we don't know its exact size yet, we already know the padding,
@@ -868,6 +878,10 @@ function layoutNodeImpl(node, parentMaxWidth, parentDirection) {
       paddingAndBorderAxisCross,
     );
   }
+
+  console.log('after layout');
+  console.log(node.layout);
+  console.log('---');
 
   currentAbsoluteChild = firstAbsoluteChild;
   while (currentAbsoluteChild !== null) {

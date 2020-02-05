@@ -41,9 +41,6 @@ export default class ComponentManager {
 
   layout() {
     layoutNode(this.rootCSSNode, this.rootCSSNode.style.width);
-    console.log('layout result:');
-    console.log(JSON.stringify(this.rootCSSNode, null, 2));
-    console.log('---');
   }
 
   addComponent(componentData, parentId, insertIndex) {

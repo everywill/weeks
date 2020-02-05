@@ -43,7 +43,18 @@ export default class Component {
   }
 
   recomputeCSSNodeChildren() {
-    
+    this.cssNode.childCount = this.childCountForLayout();
+  }
+
+  childCountForLayout() {
+    const count = this.childComponents.length;
+    for (let child in this.childComponents) {
+      if (!child.isNeedJoinLayoutSystem) {
+        count --;
+      }
+    }
+
+    return count;
   }
 
   fillCSSNode(style) {
