@@ -11,6 +11,13 @@ const toEventName = (event, id) => {
   }
 }
 
+const isFrameEqual = (a, b) => {
+  return a.width === b.width &&
+    a.height === b.height &&
+    a.left === b.left &&
+    a.top === b.top;
+} 
+
 export default class Component {
   constructor({
     id,
@@ -22,7 +29,15 @@ export default class Component {
     this.childComponents = [];
     this.parentComponent = null;
 
+    this.isLayoutDirty = true;
     this.isNeedJoinLayoutSystem = true;
+
+    this.calculatedFrame = {
+      width: undefined,
+      height: undefined,
+      left: undefined,
+      top: undefined,
+    };
 
     this.initCSSNodeWithStyle(style);
     
@@ -36,7 +51,8 @@ export default class Component {
   initCSSNodeWithStyle(style) {
     this.cssNode = newCSSNode();
     this.cssNode.context = this;
-    this.cssNode.getChild = this.cssNodeGetChild;
+    this.cssNode.isDirty = Component.cssNodeIsDirty;
+    this.cssNode.getChild = Component.cssNodeGetChild;
 
     this.recomputeCSSNodeChildren();
     this.fillCSSNode(style);
@@ -47,7 +63,7 @@ export default class Component {
   }
 
   childCountForLayout() {
-    const count = this.childComponents.length;
+    let count = this.childComponents.length;
     for (let child in this.childComponents) {
       if (!child.isNeedJoinLayoutSystem) {
         count --;
@@ -61,23 +77,40 @@ export default class Component {
     this.cssNode.style = Object.assign({}, style);
   }
 
-  cssNodeGetChild(context, index) {
-    const childComponents = context.childComponents;
-    for (let i = 0; i <= index && i < childComponents.length; i++) {
-      const child = childComponents[i];
-      if (!child.isNeedJoinLayoutSystem) {
-        index ++;
-      }
+  setNeedsLayout() {
+    this.isLayoutDirty = true;
+    if (this.parentComponent) {
+      this.parentComponent.setNeedsLayout();
+    }
+  }
+
+  calculateFrameWithSuperAbsolutePosition(superAbsolutePosition) {
+    this.isLayoutDirty = false;
+    const newFrame = {
+      height: this.cssNode.layout.height,
+      width: this.cssNode.layout.width,
+      left: superAbsolutePosition.left + this.cssNode.layout.left,
+      top: superAbsolutePosition.top + this.cssNode.layout.top,
+    };
+
+    if (!isFrameEqual(newFrame, this.calculatedFrame)) {
+      this.calculatedFrame = newFrame;
     }
 
-    if (index > 0 && index < childComponents.length) {
-      return childComponents[index];
+    for (let child of this.childComponents) {
+      child.calculateFrameWithSuperAbsolutePosition({
+        left: newFrame.left,
+        top: newFrame.top,
+      });
     }
   }
 
   insertChildComponent(childComponent, index) {
     childComponent.parentComponent = this;
     this.childComponents[index] = childComponent;
+
+    this.recomputeCSSNodeChildren();
+    this.setNeedsLayout();
   }
 
   removeFromParentComponent() {
@@ -94,5 +127,23 @@ export default class Component {
 
   removeEvent(event, callback) {
     EE.off(toEventName(event, this.id), callback);
+  }
+}
+
+Component.cssNodeIsDirty = function(context) {
+  return context.isLayoutDirty;
+}
+
+Component.cssNodeGetChild = function(context, index) {
+  const childComponents = context.childComponents;
+  for (let i = 0; i <= index && i < childComponents.length; i++) {
+    const child = childComponents[i];
+    if (!child.isNeedJoinLayoutSystem) {
+      index ++;
+    }
+  }
+
+  if (index > 0 && index < childComponents.length) {
+    return childComponents[index];
   }
 }

@@ -20,15 +20,9 @@ export default class ComponentManager {
 
     this.rootCSSNode.context = this;
     this.rootCSSNode.childCount = 1;
-    this.rootCSSNode.getChild = this.rootNodeGetChild;
+    this.rootCSSNode.isDirty = ComponentManager.rootNodeIsDirty;
+    this.rootCSSNode.getChild = ComponentManager.rootNodeGetChild;
     this.layout();
-  }
-
-  rootNodeGetChild(context, index) {
-    if (index === 0) {
-      return context.rootComponent.cssNode;
-    }
-    return null;
   }
 
   applyRootFrame(rootFrame, rootCSSNode) {
@@ -41,6 +35,8 @@ export default class ComponentManager {
 
   layout() {
     layoutNode(this.rootCSSNode, this.rootCSSNode.style.width);
+
+    this.rootComponent.calculateFrameWithSuperAbsolutePosition({left: 0, top: 0});
   }
 
   addComponent(componentData, parentId, insertIndex) {
@@ -86,4 +82,15 @@ export default class ComponentManager {
 
     // todo: relayout
   }
+}
+
+ComponentManager.rootNodeIsDirty = function(context) {
+  return context.rootComponent.isLayoutDirty;
+}
+
+ComponentManager.rootNodeGetChild = function(context, index) {
+  if (index === 0) {
+    return context.rootComponent.cssNode;
+  }
+  return null;
 }

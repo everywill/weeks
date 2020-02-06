@@ -382,14 +382,6 @@ function layoutNodeImpl(node, parentMaxWidth, parentDirection) {
   // Set the resolved resolution in the node's layout
   node.layout.direction = direction;
 
-  console.log('style');
-  console.log(node.style);
-  console.log('---')
-
-  console.log('initial layout');
-  console.log(node.layout);
-  console.log('---')
-
   node.layout[leading[mainAxis]] += getLeadingMargin(node, mainAxis) +
     getRelativePosition(node, mainAxis);
   node.layout[trailing[mainAxis]] += getTrailingMargin(node, mainAxis) +
@@ -879,6 +871,10 @@ function layoutNodeImpl(node, parentMaxWidth, parentDirection) {
     );
   }
 
+  console.log('style');
+  console.log(node.style);
+  console.log('---');
+
   console.log('after layout');
   console.log(node.layout);
   console.log('---');
@@ -926,7 +922,7 @@ export function layoutNode(node, parentMaxWidth, parentDirection) {
 
   const direction = node.style.direction || CSS_DIRECTION_LTR;
   var skipLayout =
-    !node.isDirty &&
+    !node.isDirty(node.context) &&
     node.lastLayout &&
     node.lastLayout.requestedHeight === node.layout.height &&
     node.lastLayout.requestedWidth === node.layout.width &&
