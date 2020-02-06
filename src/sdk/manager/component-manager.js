@@ -1,5 +1,6 @@
 import ComponentFactory from './component-factory';
 import { newCSSNode, layoutNode } from '../layout/index';
+import { requestIdleCallback, cancelIdleCallback } from '../utils/request-idle-callback';
 
 export default class ComponentManager {
   constructor(instance) {
@@ -7,6 +8,12 @@ export default class ComponentManager {
     this.rootComponent = null;
     this.rootCSSNode = null;
     this.builtComponent = {};
+
+    this.uiTaskQueue = [];
+    this.noTaskTickCount = 0;
+
+    this.displayLink = null;
+    this.startDisplayLink();
   }
 
   createRoot(data) {
@@ -22,7 +29,6 @@ export default class ComponentManager {
     this.rootCSSNode.childCount = 1;
     this.rootCSSNode.isDirty = ComponentManager.rootNodeIsDirty;
     this.rootCSSNode.getChild = ComponentManager.rootNodeGetChild;
-    this.layout();
   }
 
   applyRootFrame(rootFrame, rootCSSNode) {
@@ -33,10 +39,43 @@ export default class ComponentManager {
     rootCSSNode.style.height = rootFrame.size.height;
   }
 
+  startDisplayLink() {
+    this.displayLink = setTimeout(() => {
+      this.startDisplayLink();
+      this.handleDisplayLink();
+    }, 50);
+  }
+
+  suspendDisplayLink() {
+    clearTimeout(this.displayLink);
+  }
+
+  handleDisplayLink() {
+    this.layoutAndSyncUI();
+  }
+
+  layoutAndSyncUI() {
+    this.layout();
+    if (this.uiTaskQueue.length) {
+      this.syncUITasks();
+      this.noTaskTickCount = 0;
+    } else {
+      this.noTaskTickCount ++;
+      if (this.noTaskTickCount > 60) {
+        this.suspendDisplayLink();
+      }
+    }
+  }
+
   layout() {
+    console.log('start layout');
     layoutNode(this.rootCSSNode, this.rootCSSNode.style.width);
 
     this.rootComponent.calculateFrameWithSuperAbsolutePosition({left: 0, top: 0});
+  }
+
+  syncUITasks() {
+    console.log('start syncUITasks');
   }
 
   addComponent(componentData, parentId, insertIndex) {
@@ -52,8 +91,6 @@ export default class ComponentManager {
     parentComponent.insertChildComponent(component, index);
 
     const childComponentsData = componentData.children || [];
-
-    // todo: relayout
 
     for (let childComponentData of childComponentsData) {
       this.recursivelyAddComponent(childComponentData, component, -1);

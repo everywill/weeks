@@ -465,6 +465,8 @@ function layoutNodeImpl(node, parentMaxWidth, parentDirection) {
   let linesCrossDim = 0;
   let linesMainDim = 0;
   let linesCount = 0;
+
+  // console.log(`childCount of ${node.context.id}: ${childCount}`)
   
   while(endLine < childCount) {
     let mainContentDim = 0;
@@ -871,14 +873,6 @@ function layoutNodeImpl(node, parentMaxWidth, parentDirection) {
     );
   }
 
-  console.log('style');
-  console.log(node.style);
-  console.log('---');
-
-  console.log('after layout');
-  console.log(node.layout);
-  console.log('---');
-
   currentAbsoluteChild = firstAbsoluteChild;
   while (currentAbsoluteChild !== null) {
     // Pre-fill dimensions when using absolute position and both offsets for
@@ -930,6 +924,7 @@ export function layoutNode(node, parentMaxWidth, parentDirection) {
     node.lastLayout.direction === direction;
 
   if (skipLayout) {
+    console.log(`skip nodeId: ${node.context.id}`)
     node.layout.width = node.lastLayout.width;
     node.layout.height = node.lastLayout.height;
     node.layout.top = node.lastLayout.top;
@@ -946,7 +941,8 @@ export function layoutNode(node, parentMaxWidth, parentDirection) {
 
     // Reset child layouts
     for (let i = 0, length = node.childCount; i < length; i++) {
-      resetNodeLayout(node.getChild(node.context, i));
+      const childNode = node.getChild(node.context, i);
+      resetNodeLayout(childNode);
     }
 
     layoutNodeImpl(node, parentMaxWidth, parentDirection);
@@ -956,6 +952,10 @@ export function layoutNode(node, parentMaxWidth, parentDirection) {
     node.lastLayout.top = node.layout.top;
     node.lastLayout.left = node.layout.left;
   }
+
+  // console.log(`cssnode of this nodeId: ${node.context.id}`);
+  // console.log(node);
+  // console.log('---');
 }
 
 function resetNodeLayout(node) {
@@ -964,29 +964,6 @@ function resetNodeLayout(node) {
   node.layout.left = 0;
   node.layout.top = 0;
 }
-
-// function fillNodes(node) {
-//   if (!node.layout || node.isDirty) {
-//     node.layout = {
-//       width: undefined,
-//       height: undefined,
-//       top: 0,
-//       left: 0,
-//       right: undefined,
-//       bottom: undefined
-//     };
-//   }
-
-//   if (!node.style) {
-//     node.style = {};
-//   }
-
-//   if (!node.children) {
-//     node.children = [];
-//   }
-//   node.children.forEach(fillNodes);
-//   return node;
-// }
 
 function initCSSNode(node) {
   node.style.alignItem = CSS_ALIGN_STRETCH;

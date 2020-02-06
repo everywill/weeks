@@ -60,11 +60,12 @@ export default class Component {
 
   recomputeCSSNodeChildren() {
     this.cssNode.childCount = this.childCountForLayout();
+    // console.log(`childCount of ${this.id}'s cssNode: ${this.cssNode.childCount}`)
   }
 
   childCountForLayout() {
     let count = this.childComponents.length;
-    for (let child in this.childComponents) {
+    for (let child of this.childComponents) {
       if (!child.isNeedJoinLayoutSystem) {
         count --;
       }
@@ -143,7 +144,7 @@ Component.cssNodeGetChild = function(context, index) {
     }
   }
 
-  if (index > 0 && index < childComponents.length) {
-    return childComponents[index];
+  if (index >= 0 && index < childComponents.length) {
+    return childComponents[index].cssNode;
   }
 }
