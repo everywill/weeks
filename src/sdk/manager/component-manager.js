@@ -32,11 +32,11 @@ export default class ComponentManager {
   }
 
   applyRootFrame(rootFrame, rootCSSNode) {
-    rootCSSNode.style.left = rootFrame.origin.x;
-    rootCSSNode.style.top = rootFrame.origin.y;
+    rootCSSNode.style.left = 0;
+    rootCSSNode.style.top = 0;
 
-    rootCSSNode.style.width = rootFrame.size.width;
-    rootCSSNode.style.height = rootFrame.size.height;
+    rootCSSNode.style.width = rootFrame.width;
+    rootCSSNode.style.height = rootFrame.height;
   }
 
   startDisplayLink() {
