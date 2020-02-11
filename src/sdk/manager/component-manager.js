@@ -75,7 +75,12 @@ export default class ComponentManager {
   }
 
   syncUITasks() {
-    console.log('start syncUITasks');
+    const tasks = this.uiTaskQueue;
+    this.uiTaskQueue = [];
+    for (let task of tasks) {
+      task();
+    }
+    
   }
 
   addComponent(componentData, parentId, insertIndex) {

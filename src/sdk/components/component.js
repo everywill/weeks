@@ -40,6 +40,8 @@ export default class Component {
     };
 
     this.initCSSNodeWithStyle(style);
+
+    this.view = this.getView();
     
     componentEvents.forEach((eventName) => {
       this.addEvent(eventName, (e, msg) => {
