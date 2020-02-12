@@ -26,7 +26,7 @@ var text = new Konva.Text({
   fill: 'black'
 });
 layer.add(rect).add(text);
-layer.draw();
+// layer.draw();
 stage.setSize({
   width: 200,
   height: 200

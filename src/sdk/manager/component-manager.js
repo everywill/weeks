@@ -1,6 +1,6 @@
 import ComponentFactory from './component-factory';
 import { newCSSNode, layoutNode } from '../layout/index';
-import { requestIdleCallback, cancelIdleCallback } from '../utils/request-idle-callback';
+import Konva from 'konva-node';
 
 export default class ComponentManager {
   constructor(instance) {
@@ -19,6 +19,10 @@ export default class ComponentManager {
   createRoot(data) {
     this.rootComponent = this.buildComponentForData(data);
     this.initRootCSSNode();
+
+    this.addUITask(() => {
+      this.instance.rootView.add(this.rootComponent.view);
+    });
   }
 
   initRootCSSNode() {
@@ -37,6 +41,10 @@ export default class ComponentManager {
 
     rootCSSNode.style.width = rootFrame.width;
     rootCSSNode.style.height = rootFrame.height;
+  }
+
+  addUITask(task) {
+    this.uiTaskQueue.push(task);
   }
 
   startDisplayLink() {
@@ -68,19 +76,32 @@ export default class ComponentManager {
   }
 
   layout() {
-    console.log('start layout');
+    console.log(`start layout ${this.noTaskTickCount}th`);
+    let needsLayout = false;
+    for (let comp in this.builtComponent) {
+      if (comp.isLayoutDirty ) {
+        needsLayout = true;
+        break;
+      }
+    }
+
+    if (!needsLayout) {
+      return;
+    }
+
     layoutNode(this.rootCSSNode, this.rootCSSNode.style.width);
 
     this.rootComponent.calculateFrameWithSuperAbsolutePosition({left: 0, top: 0});
   }
 
   syncUITasks() {
+    console.log('start syncUITasks');
     const tasks = this.uiTaskQueue;
     this.uiTaskQueue = [];
     for (let task of tasks) {
       task();
     }
-    
+    this.instance.draw();
   }
 
   addComponent(componentData, parentId, insertIndex) {
@@ -94,6 +115,10 @@ export default class ComponentManager {
     const index = insertIndex === -1 ? parentComponent.childComponents.length : insertIndex;
 
     parentComponent.insertChildComponent(component, index);
+
+    this.addUITask(() => {
+      parentComponent.insertSubview(component, index);
+    });
 
     const childComponentsData = componentData.children || [];
 

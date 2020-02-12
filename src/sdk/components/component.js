@@ -40,14 +40,16 @@ export default class Component {
     };
 
     this.initCSSNodeWithStyle(style);
-
-    this.view = this.getView();
     
     componentEvents.forEach((eventName) => {
       this.addEvent(eventName, (e, msg) => {
         this.parentComponent && this.parentComponent.fireEvent(eventName, e, msg);
       })
     });
+  }
+
+  get view() {
+    throw 'should be implemented in sub-class';
   }
 
   initCSSNodeWithStyle(style) {
