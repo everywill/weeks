@@ -1,6 +1,6 @@
 var body = document.createBody('view')
 var div = document.createElement('view')
-// div.setStyle('color', 'red')
+div.setStyle('color', 'red')
 // var span = document.createElement('text')
 // span.setAttr('value', 'text node')
 // div.appendChild(span)

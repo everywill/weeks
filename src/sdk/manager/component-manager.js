@@ -149,6 +149,14 @@ export default class ComponentManager {
 
     // todo: relayout
   }
+
+  updateStyle(id, style) {
+    const component = this.builtComponent[id];
+    component.updateStyle(style);
+    this.addUITask(() => {
+      component.updateViewStyle(style);
+    });
+  }
 }
 
 ComponentManager.rootNodeIsDirty = function(context) {

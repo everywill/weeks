@@ -12,7 +12,8 @@ const toEventName = (event, id) => {
 }
 
 const isFrameEqual = (a, b) => {
-  return a.width === b.width &&
+  return a && b && 
+    a.width === b.width &&
     a.height === b.height &&
     a.left === b.left &&
     a.top === b.top;
@@ -32,13 +33,6 @@ export default class Component {
     this.isLayoutDirty = true;
     this.isNeedJoinLayoutSystem = true;
 
-    this.calculatedFrame = {
-      width: undefined,
-      height: undefined,
-      left: undefined,
-      top: undefined,
-    };
-
     this.initCSSNodeWithStyle(style);
     
     componentEvents.forEach((eventName) => {
@@ -49,7 +43,10 @@ export default class Component {
   }
 
   get view() {
-    throw 'should be implemented in sub-class';
+    if (!this.__view) {
+      this.__view = this.createView();
+    }
+    return this.__view;
   }
 
   initCSSNodeWithStyle(style) {
@@ -79,7 +76,24 @@ export default class Component {
   }
 
   fillCSSNode(style) {
-    this.cssNode.style = Object.assign({}, style);
+    const { width, height, fontSize, ...rest } = style;
+
+    if (width) {
+      this.cssNode.style.width = width;
+      this.setNeedsLayout();
+    }
+
+    if (height) {
+      this.cssNode.style.height = height;
+      this.setNeedsLayout();
+    }
+
+    if (fontSize) {
+      this.cssNode.style.fontSize = fontSize;
+      this.setNeedsLayout();
+    }
+
+    this.cssNode.style = Object.assign({}, this.cssNode.style, rest);
   }
 
   setNeedsLayout() {
@@ -92,14 +106,18 @@ export default class Component {
   calculateFrameWithSuperAbsolutePosition(superAbsolutePosition) {
     this.isLayoutDirty = false;
     const newFrame = {
-      height: this.cssNode.layout.height,
-      width: this.cssNode.layout.width,
       left: superAbsolutePosition.left + this.cssNode.layout.left,
       top: superAbsolutePosition.top + this.cssNode.layout.top,
+      width: this.cssNode.layout.width,
+      height: this.cssNode.layout.height,
     };
 
     if (!isFrameEqual(newFrame, this.calculatedFrame)) {
       this.calculatedFrame = newFrame;
+      this.view.x(newFrame.left);
+      this.view.y(newFrame.top);
+      this.view.width(newFrame.width);
+      this.view.height(newFrame.height);
     }
 
     for (let child of this.childComponents) {
@@ -120,6 +138,14 @@ export default class Component {
 
   removeFromParentComponent() {
 
+  }
+
+  updateStyle(style) {
+    this.fillCSSNode(style);
+  }
+
+  updateViewStyle() {
+    this.cssNode
   }
 
   fireEvent(event, ...args) {

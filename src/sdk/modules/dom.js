@@ -14,6 +14,10 @@ export default class DomModule {
     this.manager.removeComponent(componentId);
   }
 
+  updateStyle(componentId, style) {
+    this.manager.updateStyle(componentId, style);
+  }
+
   addEvent(msg) {
     console.log(`dom-module receives addEvent: ${msg}`);
   }
