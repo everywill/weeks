@@ -44,4 +44,8 @@ export default class Document {
   createElement(tagName, props) {
     return new Element(tagName, props);
   }
+
+  createTextNode(text) {
+    
+  }
 }

@@ -1,5 +1,5 @@
-var fs = require('fs');
-
+const fs = require('fs');
+const path = require('path');
 // relative path here
 // but you will need just require('konva-node');
 var Konva = require('konva-node');
@@ -20,10 +20,7 @@ var rect = new Konva.Rect({
   fill: 'white'
 });
 var text = new Konva.Text({
-  text: 'Generated inside node js',
-  x: 20,
-  y: 20,
-  fill: 'black'
+  fill: 'red'
 });
 layer.add(rect).add(text);
 // layer.draw();
@@ -32,9 +29,10 @@ stage.setSize({
   height: 200
 });
 
-text.remove();
+text.text('Generated inside node js')
 
-// check tween works
+console.log('text node size:')
+console.log(text.size());
 
 
 // After tween we want to convert stage to dataURL
@@ -44,14 +42,9 @@ setTimeout(function() {
       // Then add result to stage
       
       var base64Data = data.replace(/^data:image\/png;base64,/, '');
-      fs.writeFile('./out.png', base64Data, 'base64', function(err) {
+      fs.writeFile(path.join(__dirname + '/out.png') , base64Data, 'base64', function(err) {
         err && console.log(err);
         console.log('See out.png');
-      });
-      // now try to create image from url
-      Konva.Image.fromURL(data, () => {
-        console.log('image loaded');
-        // shoul'd throw
       });
 
     }

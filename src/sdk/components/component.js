@@ -23,9 +23,11 @@ export default class Component {
   constructor({
     id,
     style = {},
+    attr = {},
   }) {
     this.id = id;
     this.style = style;
+    this.attr = attr;
     this.cssNode = {};
     this.childComponents = [];
     this.parentComponent = null;
@@ -44,7 +46,7 @@ export default class Component {
 
   get view() {
     if (!this.__view) {
-      this.__view = this.createView(this.style);
+      this.__view = this.createView(this.style, this.attr);
     }
     return this.__view;
   }
@@ -104,7 +106,7 @@ export default class Component {
   }
 
   calculateFrameWithSuperAbsolutePosition(superAbsolutePosition) {
-    console.log(`in calculateFrameWithSuperAbsolutePosition of nodeid: ${this.id}`)
+    
     this.isLayoutDirty = false;
     const newFrame = {
       left: superAbsolutePosition.left + this.cssNode.layout.left,
@@ -114,12 +116,13 @@ export default class Component {
     };
 
     if (!isFrameEqual(newFrame, this.calculatedFrame)) {
-      console.log(`frame of nodeid ${this.id} should change`)
+      console.log(`frame of nodeid ${this.id} should change to`);
+      console.log(`x: ${newFrame.left}, y: ${newFrame.top}, width: ${newFrame.width}, height: ${newFrame.height}`);
       this.calculatedFrame = newFrame;
-      this.view.position({
+      this.view.absolutePosition({
         x: newFrame.left,
         y: newFrame.top,
-      })
+      });
       this.view.size({
         width: newFrame.width,
         height: newFrame.height,

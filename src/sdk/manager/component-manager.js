@@ -101,12 +101,14 @@ export default class ComponentManager {
     for (let task of tasks) {
       task();
     }
-    console.log('node of nodeid 2:');
-    let node = this.instance.rootView.findOne('#2');
+
+    console.log('node of nodeid 3:');
+    let node = this.instance.rootView.findOne('#3');
     console.log(`fill: ${node.fill()}`);
+    console.log(node.text());
+    console.log(node.absolutePosition());
     console.log(node.size());
-    console.log(node.absolutePosition())
-    console.log(`fill: ${node.fill()}`)
+    console.log(node.fontSize())
     this.instance.draw();
 
   }
@@ -135,9 +137,6 @@ export default class ComponentManager {
   }
 
   buildComponentForData(data) {
-    // console.log('buildComponentForData received:');
-    // console.log(data);
-    // console.log('---');
     const { type, id } = data;
     const Clazz = ComponentFactory.classWithComponentName(type);
 
