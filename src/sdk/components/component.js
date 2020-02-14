@@ -44,7 +44,7 @@ export default class Component {
 
   get view() {
     if (!this.__view) {
-      this.__view = this.createView();
+      this.__view = this.createView(this.style);
     }
     return this.__view;
   }
@@ -104,6 +104,7 @@ export default class Component {
   }
 
   calculateFrameWithSuperAbsolutePosition(superAbsolutePosition) {
+    console.log(`in calculateFrameWithSuperAbsolutePosition of nodeid: ${this.id}`)
     this.isLayoutDirty = false;
     const newFrame = {
       left: superAbsolutePosition.left + this.cssNode.layout.left,
@@ -113,11 +114,16 @@ export default class Component {
     };
 
     if (!isFrameEqual(newFrame, this.calculatedFrame)) {
+      console.log(`frame of nodeid ${this.id} should change`)
       this.calculatedFrame = newFrame;
-      this.view.x(newFrame.left);
-      this.view.y(newFrame.top);
-      this.view.width(newFrame.width);
-      this.view.height(newFrame.height);
+      this.view.position({
+        x: newFrame.left,
+        y: newFrame.top,
+      })
+      this.view.size({
+        width: newFrame.width,
+        height: newFrame.height,
+      });
     }
 
     for (let child of this.childComponents) {
@@ -141,11 +147,14 @@ export default class Component {
   }
 
   updateStyle(style) {
+    this.style = Object.assign(this.style, style);
     this.fillCSSNode(style);
   }
 
-  updateViewStyle() {
-    this.cssNode
+  updateViewStyle(style) {
+    if (style.backgroundColor) {
+      this.view.fill(style.backgroundColor);
+    }
   }
 
   fireEvent(event, ...args) {

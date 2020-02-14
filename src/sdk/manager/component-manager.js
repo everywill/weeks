@@ -78,8 +78,8 @@ export default class ComponentManager {
   layout() {
     console.log(`start layout ${this.noTaskTickCount}th`);
     let needsLayout = false;
-    for (let comp in this.builtComponent) {
-      if (comp.isLayoutDirty ) {
+    for (let compId in this.builtComponent) {
+      if (this.builtComponent[compId].isLayoutDirty ) {
         needsLayout = true;
         break;
       }
@@ -101,7 +101,14 @@ export default class ComponentManager {
     for (let task of tasks) {
       task();
     }
+    console.log('node of nodeid 2:');
+    let node = this.instance.rootView.findOne('#2');
+    console.log(`fill: ${node.fill()}`);
+    console.log(node.size());
+    console.log(node.absolutePosition())
+    console.log(`fill: ${node.fill()}`)
     this.instance.draw();
+
   }
 
   addComponent(componentData, parentId, insertIndex) {

@@ -6,9 +6,14 @@ export default class View extends Component {
     super(data);
   }
 
-  createView() {
+  createView(style) {
+    const { backgroundColor, width, height, } = style;
+    
     return new Konva.Rect({
       id: this.id,
+      fill: backgroundColor,
+      // width,
+      // height,
     });
   }
 
