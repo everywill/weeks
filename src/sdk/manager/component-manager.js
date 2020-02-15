@@ -71,12 +71,13 @@ export default class ComponentManager {
       this.noTaskTickCount ++;
       if (this.noTaskTickCount > 60) {
         this.suspendDisplayLink();
+        // write to out.png
+        this.instance.draw();
       }
     }
   }
 
   layout() {
-    console.log(`start layout ${this.noTaskTickCount}th`);
     let needsLayout = false;
     for (let compId in this.builtComponent) {
       if (this.builtComponent[compId].isLayoutDirty ) {
@@ -86,8 +87,11 @@ export default class ComponentManager {
     }
 
     if (!needsLayout) {
+      console.log(`skip layout ${this.noTaskTickCount}th`);
       return;
     }
+
+    console.log('start layout');
 
     layoutNode(this.rootCSSNode, this.rootCSSNode.style.width);
 
@@ -102,15 +106,11 @@ export default class ComponentManager {
       task();
     }
 
-    console.log('node of nodeid 3:');
-    let node = this.instance.rootView.findOne('#3');
-    console.log(`fill: ${node.fill()}`);
-    console.log(node.text());
+    console.log('node of nodeid 4:');
+    let node = this.instance.rootView.findOne('#4');
+
     console.log(node.absolutePosition());
     console.log(node.size());
-    console.log(node.fontSize())
-    this.instance.draw();
-
   }
 
   addComponent(componentData, parentId, insertIndex) {

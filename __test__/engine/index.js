@@ -27,7 +27,7 @@ ins.draw = () => {
       
       var base64Data = data.replace(/^data:image\/png;base64,/, '');
       fs.writeFile(path.join(__dirname + '/out.png'), base64Data, 'base64', function(err) {
-        console.log(base64Data);
+        // console.log(base64Data);
         err && console.log(err);
         console.log('See out.png');
       });
