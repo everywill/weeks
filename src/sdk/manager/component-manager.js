@@ -106,11 +106,11 @@ export default class ComponentManager {
       task();
     }
 
-    console.log('node of nodeid 4:');
-    let node = this.instance.rootView.findOne('#4');
+    // console.log('node of nodeid 4:');
+    // let node = this.instance.rootView.findOne('#4');
 
-    console.log(node.absolutePosition());
-    console.log(node.size());
+    // console.log(node.absolutePosition());
+    // console.log(node.size());
   }
 
   addComponent(componentData, parentId, insertIndex) {
@@ -126,6 +126,11 @@ export default class ComponentManager {
     parentComponent.insertChildComponent(component, index);
 
     this.addUITask(() => {
+      if (component.independentLayout) {
+        const rootView = component.rootView;
+        this.instance.frame.add(rootView);
+        rootView.add(component.view);
+      }
       parentComponent.insertSubview(component, index);
     });
 

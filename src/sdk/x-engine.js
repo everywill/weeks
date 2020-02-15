@@ -20,7 +20,7 @@ RenderXEngine.registerDefaultComponents = function () {
   RenderXEngine.registerComponent('view', View);
   RenderXEngine.registerComponent('text', Text);
   RenderXEngine.registerComponent('image', Image);
-  RenderXEngine.registerComponent('scroll', ScrollView);
+  RenderXEngine.registerComponent('scrollview', ScrollView);
 }
 
 RenderXEngine.registerDefaultModules = function () {

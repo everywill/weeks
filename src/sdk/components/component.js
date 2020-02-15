@@ -127,6 +127,14 @@ export default class Component {
         width: newFrame.width,
         height: newFrame.height,
       });
+      if (this.independentLayout) {
+        this.rootView.clip({
+          width: newFrame.width,
+          height: newFrame.height,
+          x: newFrame.left,
+          y: newFrame.top,
+        });
+      }
     }
 
     for (let child of this.childComponents) {
