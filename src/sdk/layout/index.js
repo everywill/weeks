@@ -924,12 +924,13 @@ export function layoutNode(node, parentMaxWidth, parentDirection) {
     node.lastLayout.direction === direction;
 
   if (skipLayout) {
-    console.log(`skip nodeId: ${node.context.id}`)
+    console.log(`layout skip nodeId: ${node.context.id}`);
     node.layout.width = node.lastLayout.width;
     node.layout.height = node.lastLayout.height;
     node.layout.top = node.lastLayout.top;
     node.layout.left = node.lastLayout.left;
   } else {
+    console.log(`layout execute nodeId: ${node.context.id}`);
     if (!node.lastLayout) {
       node.lastLayout = {};
     }

@@ -123,10 +123,13 @@ export default class Component {
         x: newFrame.left,
         y: newFrame.top,
       });
-      this.view.size({
-        width: newFrame.width,
-        height: newFrame.height,
-      });
+      if (!this.cssNode.measure) {
+        this.view.size({
+          width: newFrame.width,
+          height: newFrame.height,
+        });
+      }
+      
       if (this.independentLayout) {
         this.rootView.clip({
           width: newFrame.width,
@@ -166,6 +169,10 @@ export default class Component {
     if (style.backgroundColor) {
       this.view.fill(style.backgroundColor);
     }
+  }
+
+  updateAttr(attr) {
+    this.attr = Object.assign(this.attr, attr);
   }
 
   fireEvent(event, ...args) {

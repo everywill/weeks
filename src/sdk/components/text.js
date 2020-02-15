@@ -17,10 +17,27 @@ export default class Text extends Component {
       fontSize,
       fill: color,
       text: value,
+      width: 'auto',
+      height: 'auto',
     });
   }
 
+  updateAttr(attr) {
+    const { value } = attr;
+    this.attr = Object.assign(this.attr, attr);
+
+    if (value !== undefined) {
+      this.view.text(value);
+      // this.view.draw();
+      this.setNeedsLayout();
+    }
+  }
+
   getViewSize() {
-    return this.view.size();
+    const size = this.view.size();
+    const text = this.view.text();
+    console.log(`measure size of ${text}:`);
+    console.log(size);
+    return size;
   }
 }

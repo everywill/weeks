@@ -7,6 +7,7 @@ function init (cfg) {
 }
 
 function createInstance(id, code) {
+
   const document = new config.Document(id);
 
   instanceMap[id] = document;

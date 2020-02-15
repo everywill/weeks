@@ -10,7 +10,7 @@ function createInstance(id, code) {
       created: Date.now(),
       framework: 'xRender',
     }
-    
+    console.log(`js-framework: createInstance received id: ${id}`);
     return framework.createInstance(id, code);
   }
 }

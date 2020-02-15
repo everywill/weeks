@@ -168,6 +168,11 @@ export default class ComponentManager {
       component.updateViewStyle(style);
     });
   }
+
+  updateAttr(id, attr) {
+    const component = this.builtComponent[id];
+    component.updateAttr(attr);
+  }
 }
 
 ComponentManager.rootNodeIsDirty = function(context) {

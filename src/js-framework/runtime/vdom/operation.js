@@ -1,7 +1,7 @@
 const docMap = {};
 
 export function addDoc (id, doc) {
-  if (id) {
+  if (id !== undefined) {
     docMap[id] = doc;
   }
 };
@@ -59,7 +59,7 @@ export function setBody (doc, el) {
 
 export function linkParent (node, parent) {
   node.parentNode = parent;
-  if (parent.docId) {
+  if (parent.docId !== undefined) {
     node.docId = parent.docId;
     node.ownerDocument = parent.ownerDocument;
     node.ownerDocument.nodeMap[node.nodeId] = node;

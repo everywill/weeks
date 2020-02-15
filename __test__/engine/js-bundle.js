@@ -35,5 +35,9 @@ body.appendChild(view);
 body.appendChild(scrollview);
 
 document.documentElement.appendChild(body);
+setTimeout(() => {
+  text.setAttr('value', 'changed content');
+}, 100);
 
-console.log('bundle loaded')
+
+console.log('bundle loaded');

@@ -35,7 +35,7 @@ export function init() {
     addElement: 'callAddElement',
     removeElement: 'callRemoveElement',
     moveElement: 'callMoveElement',
-    updateAttrs: 'callUpdateAttrs',
+    updateAttr: 'callUpdateAttr',
     updateStyle: 'callUpdateStyle',
 
     addEvent: 'callAddEvent',

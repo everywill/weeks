@@ -55,13 +55,16 @@ export default class Element {
       return;
     }
     this.attr[key] = value;
-    const taskCenter = getTaskCenter(this.docId)
+    const taskCenter = getTaskCenter(this.docId);
+    console.log('js-framework: setAttr:')
+    console.log(`js-framework: ${key}: ${value}`);
     if (taskCenter) {
+      console.log('send updateAttr to task-center');
       const result = {};
       result[key] = value;
       taskCenter.send(
         'dom',
-        { action: 'updateAttrs' },
+        { action: 'updateAttr' },
         [this.nodeId, result],
       );
     }
@@ -74,6 +77,7 @@ export default class Element {
     this.style[key] = value;
     const taskCenter = getTaskCenter(this.docId);
     if (taskCenter) {
+      console.log('send updateStyle to task-center');
       const result = {};
       result[key] = value;
       taskCenter.send(

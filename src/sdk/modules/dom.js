@@ -18,8 +18,8 @@ export default class DomModule {
     this.manager.updateStyle(componentId, style);
   }
 
-  updateAttrs(componentId, attribute) {
-    console.log('dom-module updateAttrs');
+  updateAttr(componentId, attr) {
+    this.manager.updateAttr(componentId, attr);
   }
 
   addEvent(msg) {
