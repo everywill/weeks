@@ -4,6 +4,7 @@ import {
   linkParent,
   insertIndex,
   getDoc,
+  removeIndex,
 } from './operation';
 
 function registerNode (docId, node) {

@@ -35,8 +35,10 @@ body.appendChild(view);
 body.appendChild(scrollview);
 
 document.documentElement.appendChild(body);
+
 setTimeout(() => {
-  text.setAttr('value', 'changed content');
+  body.removeChild(text);
+  // text.setAttr('value', 'changed content');
   // view.setStyle('backgroundColor', 'yellow');
 }, 300);
 

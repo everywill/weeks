@@ -37,8 +37,6 @@ export default class BridgeContext {
     const manager = instance.componentManager;
 
     manager.addComponent(componentData, parentId, insertIndex);
-
-    // console.log(manager.rootComponent);
   }
 
   callWorkerMethod(method, args) {

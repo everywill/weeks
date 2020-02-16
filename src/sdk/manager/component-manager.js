@@ -158,7 +158,9 @@ export default class ComponentManager {
     component.removeFromParentComponent();
     delete this.builtComponent[id];
 
-    // todo: relayout
+    this.addUITask(() => {
+      component.removeFromParentView();
+    });
   }
 
   updateStyle(id, style) {

@@ -157,7 +157,18 @@ export default class Component {
   }
 
   removeFromParentComponent() {
+    this.parentComponent.removeChildComponent(this);
+    this.parentComponent.recomputeCSSNodeChildren();
+    this.parentComponent.setNeedsLayout();
+  }
 
+  removeChildComponent(childComponent) {
+    const index = this.childComponents.indexOf(childComponent);
+    this.childComponents.splice(index, 1);
+  }
+
+  removeFromParentView() {
+    this.view.remove();
   }
 
   updateStyle(style) {
