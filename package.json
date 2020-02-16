@@ -2,22 +2,30 @@
   "name": "x-render",
   "version": "1.0.0",
   "devDependencies": {
+    "@babel/cli": "^7.8.4",
+    "@babel/core": "^7.8.4",
+    "@babel/plugin-transform-react-jsx": "^7.8.3",
+    "@babel/preset-env": "^7.8.4",
+    "babel-loader": "^8.0.6",
     "rollup": "^1.30.1",
     "tslint": "^5.20.1",
-    "typescript": "^3.7.4"
+    "tslint-config-airbnb": "^5.11.2",
+    "typescript": "^3.7.4",
+    "webpack": "^4.41.6",
+    "webpack-cli": "^3.3.11"
   },
   "dependencies": {
     "axios": "^0.19.2",
     "konva": "^4.1.3",
-    "konva-node": "^0.11.1",
-    "tslint-config-airbnb": "^5.11.2"
+    "konva-node": "^0.11.1"
   },
   "scripts": {
     "debug": "node --inspect-brk ./__test__/engine/index.js --verbose",
     "build:js-framework": "rollup ./src/js-framework/index.js -f umd -n js-framework -o dist/js-framework.umd.js",
     "build:sdk": "rollup ./src/sdk/index.js -f umd -n x-render -o dist/x-render.umd.js",
-    "build:mReact": "rollup ./src/dsl/mReact/src/index.js -f umd -n mReact -o dist/mReact.umd.js",
-    "build:mVue": "rollup ./src/dsl/mVue/index.js -f umd -n mVue -o dist/mVue.umd.js"
+    "build:mReact": "rollup ./src/dsl/mReact/src/index.js -f esm -n mReact -o dist/mReact.es.js",
+    "build:mVue": "rollup ./src/dsl/mVue/index.js -f esm -n mVue -o dist/mVue.es.js",
+    "build:js-bundle": "webpack"
   },
   "license": "MIT",
   "author": "everywill <everywillatchina@gmail.com>"
