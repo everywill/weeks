@@ -172,6 +172,7 @@ export default class ComponentManager {
   updateAttr(id, attr) {
     const component = this.builtComponent[id];
     component.updateAttr(attr);
+    this.addUITask(() => {});
   }
 }
 

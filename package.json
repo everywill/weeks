@@ -15,7 +15,9 @@
   "scripts": {
     "debug": "node --inspect-brk ./__test__/engine/index.js --verbose",
     "build:js-framework": "rollup ./src/js-framework/index.js -f umd -n js-framework -o dist/js-framework.umd.js",
-    "build:sdk": "rollup ./src/sdk/index.js -f umd -n x-render -o dist/x-render.umd.js"
+    "build:sdk": "rollup ./src/sdk/index.js -f umd -n x-render -o dist/x-render.umd.js",
+    "build:mReact": "rollup ./src/dsl/mReact/src/index.js -f umd -n mReact -o dist/mReact.umd.js",
+    "build:mVue": "rollup ./src/dsl/mVue/index.js -f umd -n mVue -o dist/mVue.umd.js"
   },
   "license": "MIT",
   "author": "everywill <everywillatchina@gmail.com>"

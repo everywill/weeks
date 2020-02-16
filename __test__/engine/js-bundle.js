@@ -37,7 +37,8 @@ body.appendChild(scrollview);
 document.documentElement.appendChild(body);
 setTimeout(() => {
   text.setAttr('value', 'changed content');
-}, 100);
+  // view.setStyle('backgroundColor', 'yellow');
+}, 300);
 
 
 console.log('bundle loaded');
