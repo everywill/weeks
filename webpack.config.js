@@ -3,7 +3,8 @@ const path = require('path');
 
 module.exports = {
   mode: 'production',
-  entry: './__test__/dsl/react.js',
+  // entry: './__test__/dsl/react.js',
+  entry: './__test__/dsl/vue.js',
   output: {
     path: path.join(__dirname, '/__test__/dsl'),
     filename: 'js-bundle.js'

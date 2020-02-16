@@ -12,6 +12,7 @@ export function updateDomProperties(node, prevProps, nextProps) {
       const eventType = propName.toLowerCase().substring(2);
       node.removeEventListener(eventType, prevProps[propName]);
     }
+    if (isStyle(propName)) {}
     if (isAttribute(propName) && !nextProps.hasOwnProperty(propName)) {
       node.setAttr(propName, null);
     }
