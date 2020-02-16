@@ -6,4 +6,14 @@ const view = document.createElement('view');
 body.appendChild(view);
 document.documentElement.appendChild(body);
 
-render(<view/>, view);
+class Test extends mReact.Component {
+  render() {
+    return (
+      <view style={{ width: 100, height: 100, backgroundColor: 'red' }}>
+        
+      </view>
+    );
+  }
+}
+ 
+render(<Test />, view);

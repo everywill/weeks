@@ -2,10 +2,11 @@ const webpack = require('webpack');
 const path = require('path');
 
 module.exports = {
+  mode: 'production',
   entry: './__test__/dsl/react.js',
   output: {
     path: path.join(__dirname, '/__test__/dsl'),
-    filename: 'bundle.js'
+    filename: 'js-bundle.js'
   },
   module: {
     rules: [

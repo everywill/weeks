@@ -41,7 +41,7 @@ ins.draw = () => {
   });
 }
 
-fs.readFile(path.join(__dirname + '/bundle.js'), function(error, data) {
+fs.readFile(path.join(__dirname + '/js-bundle.js'), function(error, data) {
   if (error) throw error;
   ins.renderWithBundleString(data.toString());
 });
