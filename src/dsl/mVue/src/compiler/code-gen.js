@@ -42,6 +42,12 @@ function genConfig(element) {
           value: `_s(${value})`,
         });
       }
+      if (regResult[2] === 'style') {
+        domProps.push({
+          name: 'style',
+          value: (new Function(`return ${value}`))(),
+        })
+      }
       if (regResult[1] === 'bind') {
         attrs.push({
           name: `${regResult[2]}`,

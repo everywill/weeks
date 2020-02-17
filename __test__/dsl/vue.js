@@ -7,7 +7,7 @@ body.appendChild(view);
 document.documentElement.appendChild(body);
 
 const myComponent = mVue.extend({
-  template: '<view style="{{ width: 100, height: 100 }}"></view>',
+  template: '<view style="{width: 100, height: 100}"></view>',
 });
 
 new mVue({
@@ -17,12 +17,9 @@ new mVue({
   },
   template: '<my-component></my-component>',
   data: {
-    number: [0,1],
-    a: 1
-  },
-  computed: {
-    sum: function() {
-      return this.number[0] + this.a;
+    style: {
+      width: 100,
+      height: 100,
     }
-  },
+  }
 });

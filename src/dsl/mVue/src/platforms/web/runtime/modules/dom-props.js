@@ -3,6 +3,8 @@ export default {
   update: updateDomProps,
 };
 
+const isStyle = key => key === 'style';
+
 function updateDomProps(oldVnode, vnode) {
   const elm = vnode.elm;
   const { children: oldChildren, ...oldAttrs } = oldVnode.data || {};
@@ -12,11 +14,24 @@ function updateDomProps(oldVnode, vnode) {
 
   for (let key in oldDomProps) {
     if (domProps.hasOwnProperty(key)) {
-      elm[key] = null;
+      if (isStyle(key)) {
+
+      } else {
+        elm.setAttr(key, null);
+      }
     }
   }
 
+  console.log('updateDomProps for domProps');
+  console.log(domProps);
+
   for (let key in domProps) {
-    elm[key] = domProps[key];
+    if (isStyle(key)) {
+      for (let name in domProps[key]) {
+        elm.setStyle(name, domProps[key][name]);
+      }
+    } else {
+      elm.setAttr(key, domProps[key]);
+    }
   }
 }
