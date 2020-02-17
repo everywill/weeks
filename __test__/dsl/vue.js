@@ -7,7 +7,7 @@ body.appendChild(view);
 document.documentElement.appendChild(body);
 
 const myComponent = mVue.extend({
-  template: '<view style="{width: 100, height: 100}"></view>',
+  template: `<view style="{width: 100, height: 100, backgroundColor: 'red'}"></view>`,
 });
 
 new mVue({

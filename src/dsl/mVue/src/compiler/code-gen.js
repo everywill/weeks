@@ -42,12 +42,7 @@ function genConfig(element) {
           value: `_s(${value})`,
         });
       }
-      if (regResult[2] === 'style') {
-        domProps.push({
-          name: 'style',
-          value: (new Function(`return ${value}`))(),
-        })
-      }
+      
       if (regResult[1] === 'bind') {
         attrs.push({
           name: `${regResult[2]}`,
@@ -55,10 +50,17 @@ function genConfig(element) {
         });
       }
     } else {
-      attrs.push({
-        name,
-        value: `'${value}'`,
-      });
+      if (name === 'style') {
+        domProps.push({
+          name: 'style',
+          value,
+        })
+      } else {
+        attrs.push({
+          name,
+          value: `'${value}'`,
+        });
+      }
     }
   }
 
