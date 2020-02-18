@@ -22,7 +22,8 @@
   "scripts": {
     "debug": "node --inspect-brk ./__test__/engine/index.js --verbose",
     "build:js-framework": "rollup ./src/js-framework/index.js -f umd -n js-framework -o dist/js-framework.umd.js",
-    "build:sdk": "rollup ./src/sdk/index.js -f umd -n x-render -o dist/x-render.umd.js",
+    "build:sdk:node": "rollup ./src/platforms/node-canvas/index.js -f umd -n x-render -o dist/x-render-node.umd.js",
+    "build:sdk:html": "rollup ./src/platforms/html-canvas/index.js -f umd -n x-render -o dist/x-render-html.umd.js",
     "build:mReact": "rollup ./src/dsl/mReact/src/index.js -f esm -n mReact -o dist/mReact.es.js",
     "build:mVue": "rollup ./src/dsl/mVue/index.js -f esm -n mVue -o dist/mVue.es.js",
     "build:js-bundle": "webpack"

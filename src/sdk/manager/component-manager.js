@@ -1,6 +1,5 @@
 import ComponentFactory from './component-factory';
 import { newCSSNode, layoutNode } from '../layout/index';
-import Konva from 'konva-node';
 
 export default class ComponentManager {
   constructor(instance) {

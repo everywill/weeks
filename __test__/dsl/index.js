@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { xEngine, xInstance } = require('../../dist/x-render.umd');
+const { xEngine, xInstance } = require('../../dist/x-render-node.umd');
 var Konva = require('konva-node');
 
 const frameworkBundle = path.join(__dirname + '../../../dist/js-framework.umd.js');
