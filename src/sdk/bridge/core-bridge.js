@@ -1,4 +1,12 @@
-const { Worker } = require('worker_threads');
+// eliminate differences between node and web
+global = global || globalThis;
+if (global.Worker) {
+  global.Worker.on = function(type, data) {
+    global.Worker
+  }
+} else {
+  global.Worker = require('worker_threads').Worker;
+}
 
 export default class CoreBridge {
   constructor() {}

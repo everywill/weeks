@@ -1,6 +1,20 @@
-// dedicated to node
+// eliminate differences between node and web
+global = global || globalThis;
+let parentPort;
 
-const { parentPort } = require('worker_threads');
+if (typeof global.onmessage === 'function') {
+  // in web
+  parentPort = {
+    on(type, cb) {
+      global.onmessage = cb;
+    },
+    postMessage(data) {
+      global.postMessage(data);
+    }
+  };
+} else {
+  parentPort = require('worker_threads').parentPort;
+}
 
 global.parentPort = parentPort;
 
