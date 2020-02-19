@@ -1,5 +1,5 @@
-import Emitter from '../utils/event-emitter';
-import { newCSSNode } from '../layout/index';
+import Emitter from '../../../sdk/utils/event-emitter';
+import { newCSSNode } from '../../../sdk/layout/index';
 
 const EE = new Emitter();
 
