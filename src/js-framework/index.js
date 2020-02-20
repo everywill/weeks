@@ -2,11 +2,13 @@
 global = global || globalThis;
 let parentPort;
 
-if (typeof global.onmessage === 'function') {
+if (global.hasOwnProperty('onmessage')) {
   // in web
   parentPort = {
     on(type, cb) {
-      global.onmessage = cb;
+      global.onmessage = (e) => {
+        cb(e.data);
+      };
     },
     postMessage(data) {
       global.postMessage(data);
@@ -26,7 +28,14 @@ parentPort.on('message', ({cmd, data}) => {
   switch (cmd) {
     case 'invokeMethod':
       const { name, args } = data;
-      global[name](...args);
+      try {
+        
+        global[name](...args);
+      } catch(err) {
+        console.log(`invokeMethod ${name}`);
+        console.log(args);
+        console.error(err);
+      }
   }
 });
 

@@ -71,7 +71,11 @@ export default class ComponentManager {
       if (this.noTaskTickCount > 60) {
         this.suspendDisplayLink();
         // write to out.png
-        this.instance.draw();
+        try {
+          this.instance.draw();
+        } catch(error) {
+          console.error(error);
+        }
       }
     }
   }

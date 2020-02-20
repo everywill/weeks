@@ -16,8 +16,8 @@ function createInstance(id, code) {
 }
 
 function registerMethod(methodName, method) {
-  global = global || globalThis;
-  global[methodName] = new Function(...method);
+  let g = global || globalThis;
+  g[methodName] = new Function(...method);
 }
 
 function requestIdleCallback(cb) {

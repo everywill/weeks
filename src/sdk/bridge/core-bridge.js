@@ -1,8 +1,10 @@
 // eliminate differences between node and web
 global = global || globalThis;
 if (global.Worker) {
-  global.Worker.on = function(type, data) {
-    global.Worker
+  global.Worker.prototype.on = function(type, cb) {
+    this.onmessage = (e) => {
+      cb(e.data);
+    }
   }
 } else {
   global.Worker = require('worker_threads').Worker;
@@ -29,13 +31,13 @@ export default class CoreBridge {
     this.callWorkerMethod('registerMethod', [
       'callNative', 
       ['instanceId', 'taskArray', `
-        global.parentPort.postMessage({cmd: 'callNative', data: {instanceId, taskArray}});
+        globalThis.parentPort.postMessage({cmd: 'callNative', data: {instanceId, taskArray}});
       `],
     ]);
     this.callNative = function(data) {
-      console.log('data received in callNative:');
-      console.log(JSON.stringify(data, null, 2));
-      console.log('---');
+      // console.log('data received in callNative:');
+      // console.log(JSON.stringify(data, null, 2));
+      // console.log('---');
       const { instanceId, taskArray } = data;
       callNative(instanceId, taskArray);
     }
@@ -45,7 +47,7 @@ export default class CoreBridge {
     this.callWorkerMethod('registerMethod', [
       'callAddElement',
       ['instanceId', 'parentId', 'componentData', 'insertIndex', `
-        global.parentPort.postMessage({cmd: 'callAddElement', data: {instanceId, parentId, componentData, insertIndex}});
+        globalThis.parentPort.postMessage({cmd: 'callAddElement', data: {instanceId, parentId, componentData, insertIndex}});
       `]
     ]);
     this.callAddElement = function(data) {
@@ -58,6 +60,8 @@ export default class CoreBridge {
   }
 
   callWorkerMethod(method, args) {
+    console.log(`callWorkerMethod ${method}`);
+    console.log(args);
     this.jsContext.postMessage({cmd: 'invokeMethod', data: { name: method, args}});
   }
 }

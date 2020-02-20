@@ -7,6 +7,7 @@
     "@babel/plugin-transform-react-jsx": "^7.8.3",
     "@babel/preset-env": "^7.8.4",
     "babel-loader": "^8.0.6",
+    "html-webpack-plugin": "^3.2.0",
     "rollup": "^1.30.1",
     "tslint": "^5.20.1",
     "tslint-config-airbnb": "^5.11.2",
@@ -27,7 +28,8 @@
     "build:sdk:html": "rollup ./src/platforms/html-canvas/index.js -f umd -n x-render -o dist/x-render-html.umd.js",
     "build:mReact": "rollup ./src/dsl/mReact/src/index.js -f esm -n mReact -o dist/mReact.es.js",
     "build:mVue": "rollup ./src/dsl/mVue/index.js -f esm -n mVue -o dist/mVue.es.js",
-    "build:js-bundle": "webpack"
+    "build:js-bundle": "webpack",
+    "dev": "cd __test__/html-canvas && webpack-dev-server"
   },
   "license": "MIT",
   "author": "everywill <everywillatchina@gmail.com>"
